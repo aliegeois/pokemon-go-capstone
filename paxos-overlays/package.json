@@ -30,7 +30,7 @@
     "chart.js": "^2.7.3",
     "debug": "^4.0.1",
     "foglet-core": "^5.1.1",
-    "lodash.merge": "^4.6.1",
+    "lodash.merge": "^4.6.2",
     "sigma": "^1.2.1",
     "tman-wrtc": "git+https://github.com/nachmo5/tman-wrtc.git",
     "uuid": "^3.3.2"
