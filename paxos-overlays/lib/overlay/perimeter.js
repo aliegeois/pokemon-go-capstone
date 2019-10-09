@@ -92,8 +92,8 @@ module.exports = class Perimeter extends TMAN {
    * @return {integer} `0 if peerA == peerB`, `1 if peerA < peerB` and `-1 if peerA > peerB` (according to the ranking algorithm)
    */
   _rankPeers(neighbour, descriptorA, descriptorB, peerA, peerB) {
-    return 1;
-    //   const { coordinates, perimeter } = this.options.target;
-    //   return this.isNearby(coordinates, descriptorA, perimeter) ? -1 : 1;
+    // return 1;
+      const { coordinates, perimeter } = this.options.target;
+      return this.isNearby(coordinates, descriptorA, perimeter) ? -1 : 1;
   }
 };
