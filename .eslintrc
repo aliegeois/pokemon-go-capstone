@@ -2,7 +2,8 @@
   "globals": {
     "localStorage": true,
     "fetch": true,
-    "document": true
+    "document": true,
+    "browser": true
   },
   "parser": "babel-eslint",
   "plugins": ["react"],

@@ -1,9 +1,6 @@
-import React, { PureComponent, Fragment } from "react";
 import { paxos, template, target } from "foglet-template";
-import Loading from "./Loading";
 
-const withFoglet = App =>
-class withFoglet extends PureComponent {
+class withFoglet {
 	state = {
 		nodes: [],
 		nodeData: [],
@@ -20,14 +17,15 @@ class withFoglet extends PureComponent {
 	};
 
 	constructor() {
-		super();
+		console.log('constructor');
+		// super();
 		/*navigator.geolocation.getCurrentPosition(position => {
 			console.log(position.coords);
 			console.log('this', this);
 			withFoglet.addNode({
 				x: position.coords.longitude,
 				y: position.coords.latitude
-			})();
+			});
 		});*/
 	}
 
@@ -167,27 +165,12 @@ class withFoglet extends PureComponent {
 			}));
 		}
 	};
-	
-	render() {
-		const addedProps = {
-			addTarget: this.addTarget,
-			addNode: this.addNode,
-			getTarget: this.getTarget,
-			nodeTargets: this.state.nodeTargets,
-			nodes: this.state.nodeData,
-			caught: this.state.caught,
-			leaders: this.state.nodeLeaders
-		};
-		return (
-			<Fragment>
-			<Loading
-			loading={this.state.loading}
-			message={this.state.loadingMessage}
-			/>
-			<App {...this.props} {...addedProps} />
-			</Fragment>
-		);
-	}
 };
 
-export default withFoglet;
+let main = () => {
+	console.log('main');
+	const f = new withFoglet();
+	f.addNode()();
+};
+
+main();
