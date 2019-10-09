@@ -1,0 +1,15 @@
+{
+  "globals": {
+    "localStorage": true,
+    "fetch": true,
+    "document": true
+  },
+  "parser": "babel-eslint",
+  "plugins": ["react"],
+  "rules": {
+    "quotes": "off",
+    "import/no-unresolved": "off",
+    "no-console": "off"
+  },
+  "extends": ["airbnb-base", "eslint:recommended", "plugin:react/recommended"]
+}
