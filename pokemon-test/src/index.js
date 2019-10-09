@@ -29,7 +29,7 @@ class withFoglet {
 				y: position.coords.latitude
 			});
 		});*/
-		
+	}
 
 	test = () => {
 		console.log('dans test');
