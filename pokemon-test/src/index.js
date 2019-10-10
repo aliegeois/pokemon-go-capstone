@@ -15,9 +15,11 @@ class withFoglet {
 		nodeIndex: 0,
 		targetIndex: 0
 	};
+	
 
 	constructor() {
 		console.log('constructor');
+		
 		// super();
 		/*navigator.geolocation.getCurrentPosition(position => {
 			console.log(position.coords);
@@ -166,11 +168,23 @@ class withFoglet {
 		}
 	};
 };
+	addMap = () => {
+	var optionsGmaps = {
+    	center:centerpos,
+    	mapTypeId: google.maps.MapTypeId.ROADMAP,
+    	zoom: 15
+	};
+	
+	var map = new google.maps.Map(document.getElementById("map"), optionsGmaps);
+	};
+};
 
 let main = () => {
 	console.log('main');
+	addMap();
 	const f = new withFoglet();
 	f.addNode()();
+	
 };
 
 main();
