@@ -170,13 +170,28 @@ class withFoglet {
 }
 
 const addMap = () => {
-	const optionsGmaps = {
-		center: centerpos,
-		mapTypeId: google.maps.MapTypeId.ROADMAP,
-		zoom: 15
-	};
-	
-	/*const map = */new google.maps.Map(document.getElementById("map"), optionsGmaps);
+    var map = null;
+    map = new google.maps.Map(document.getElementById("map"), {
+        // Nous définissons le zoom par défaut
+        zoom: 11,
+        // Nous définissons le type de carte (ici carte routière)
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        // Nous activons les options de contrôle de la carte (plan, satellite...)
+        mapTypeControl: true,
+        // Nous désactivons la roulette de souris
+        scrollwheel: false,
+        mapTypeControlOptions: {
+            // Cette option sert à définir comment les options se placent
+            style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR
+        },
+        // Activation des options de navigation dans la carte (zoom...)
+        navigationControl: true,
+        navigationControlOptions: {
+            // Comment ces options doivent-elles s'afficher
+            style: google.maps.NavigationControlStyle.ZOOM_PAN
+        }
+    });
+
 };
 
 let main = () => {
@@ -186,4 +201,8 @@ let main = () => {
 	f.addNode()();
 };
 
+window.onload = function () {
+    // Fonction d'initialisation qui s'exécute lorsque le DOM est chargé
+    addMap();
+};
 main();
