@@ -167,16 +167,16 @@ class withFoglet {
 			}));
 		}
 	};
-};
-	addMap = () => {
-	var optionsGmaps = {
-    	center:centerpos,
-    	mapTypeId: google.maps.MapTypeId.ROADMAP,
-    	zoom: 15
+}
+
+const addMap = () => {
+	const optionsGmaps = {
+		center: centerpos,
+		mapTypeId: google.maps.MapTypeId.ROADMAP,
+		zoom: 15
 	};
 	
-	var map = new google.maps.Map(document.getElementById("map"), optionsGmaps);
-	};
+	/*const map = */new google.maps.Map(document.getElementById("map"), optionsGmaps);
 };
 
 let main = () => {
@@ -184,7 +184,6 @@ let main = () => {
 	addMap();
 	const f = new withFoglet();
 	f.addNode()();
-	
 };
 
 main();
