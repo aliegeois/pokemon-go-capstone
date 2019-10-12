@@ -1,4 +1,5 @@
 import { paxos, template, target } from "foglet-template";
+import Foglet from 'foglet-core';
 
 class withFoglet {
 	state = {
@@ -36,11 +37,19 @@ class withFoglet {
 	};
 	
 	addNode = data => async () => {
-		console.log('data:', data);
-		navigator.geolocation.getCurrentPosition(async position => {
-			const x = position.coords.longitude;
-			const y = position.coords.latitude;
 		
+		navigator.geolocation.getCurrentPosition(async position => {
+			const x = position.coords.latitude;
+			const y = position.coords.longitude;
+			console.log('data:', {x, y});
+		
+			new google.maps.Map(document.getElementById('map'), {
+				center: {
+					lat: x,
+					lng: y
+				},
+				zoom: 18
+			});
 		
 			if (!x || !y) return;
 			const id = this.state.nodeIndex + 1;
@@ -72,42 +81,6 @@ class withFoglet {
 			nodeTargets[nodeId] = targets;
 			
 			const nodePaxos = new paxos(node, ({ cible, pid }) => {
-				this.setState(prev => {
-					const myLeaders = prev.nodeLeaders[nodeId];
-					let myNewLeaders = {};
-					if (!myLeaders) {
-						myNewLeaders[cible] = pid.peer;
-					} else {
-						myNewLeaders = { ...myLeaders, [cible]: pid.peer };
-					}
-					return {
-						leaders: {
-							...this.state.leaders,
-							[cible]: pid
-						},
-						nodeLeaders: {
-							...prev.nodeLeaders,
-							[nodeId]: myNewLeaders
-						},
-						loading: false
-					};
-				});
-			});
-			
-			this.setState(prev => {
-				const data = {
-					nodeIndex: id,
-					nodeData: [...prev.nodeData, { id: nodeId, x, y }],
-					nodes: [...prev.nodes, node],
-					paxoses: {
-						...prev.paxoses,
-						[nodeId]: nodePaxos
-					}
-				};
-				if (targets.length > 0) {
-					data[nodeTargets] = { ...prev.nodeTargets, nodeTargets };
-				}
-				return data;
 			});
 
 			
@@ -125,63 +98,22 @@ class withFoglet {
 			perimeter
 		});
 		
-		const targetData = {
-			id: spawned.id,
-			x,
-			y,
-			perimeter,
-			pokemon
-		};
-		
-		let nodeTargets = this.state.nodeTargets;
-		this.state.nodes.forEach(node => {
-			const response = node.targetSpawned(spawned);
-			if (!response) return;
-			// Update node targets
-			const nodeId = node.foglet.inViewID;
-			if (nodeTargets[nodeId])
-			nodeTargets[nodeId] = [...nodeTargets[nodeId], targetData];
-			else nodeTargets[nodeId] = [targetData];
-		});
-		
 		spawned.pokemon = pokemon;
-		this.setState(prev => ({
-			targetIndex: id,
-			nodeTargets: { ...prev.nodeTargets, nodeTargets },
-			targets: [...prev.targets, spawned]
-		}));
-	};
-	
-	getTarget = (node, target) => async () => {
-		this.setState({
-			loading: true,
-			loadingMessage: "Consensus en cours ..."
-		});
-		const { pid, cible } = await this.state.paxoses[node.id].getTarget(
-			target.id
-		);
-		if (pid && cible) {
-			this.setState(prev => ({
-				caught: { ...prev.caught, [cible]: pid },
-				loading: false
-			}));
-		}
 	};
 }
 
 const addMap = () => {
-    var map = null;
-    map = new google.maps.Map(document.getElementById("map"), {
-        // Nous définissons le zoom par défaut
+    /*const map = new google.maps.Map(document.getElementById("map"), {
+        // Nous dÃ©finissons le zoom par dÃ©faut
         zoom: 11,
-        // Nous définissons le type de carte (ici carte routière)
+        // Nous dÃ©finissons le type de carte (ici carte routiÃ¨re)
         mapTypeId: google.maps.MapTypeId.ROADMAP,
-        // Nous activons les options de contrôle de la carte (plan, satellite...)
+        // Nous activons les options de contrÃ´le de la carte (plan, satellite...)
         mapTypeControl: true,
-        // Nous désactivons la roulette de souris
+        // Nous dÃ©sactivons la roulette de souris
         scrollwheel: false,
         mapTypeControlOptions: {
-            // Cette option sert à définir comment les options se placent
+            // Cette option sert Ã  dÃ©finir comment les options se placent
             style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR
         },
         // Activation des options de navigation dans la carte (zoom...)
@@ -190,19 +122,17 @@ const addMap = () => {
             // Comment ces options doivent-elles s'afficher
             style: google.maps.NavigationControlStyle.ZOOM_PAN
         }
-    });
-
+    });*/
 };
 
 let main = () => {
 	console.log('main');
-	addMap();
 	const f = new withFoglet();
 	f.addNode()();
 };
 
 window.onload = function () {
-    // Fonction d'initialisation qui s'exécute lorsque le DOM est chargé
+    // Fonction d'initialisation qui s'exÃ©cute lorsque le DOM est chargÃ©
     addMap();
 };
 main();
