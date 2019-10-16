@@ -1,0 +1,7 @@
+Quand on lance le programme:
+1. Se connecter au signaling server pour récupérer un peer
+2. A partir de ce peer, construire un réseau rps avec cyclon
+3. Appliquer ensuite TMAN pour trouver les peers les plus proches (en définissant une fonction de ranking pour trier par distance géographique)
+    3.1. Laisser TMAN tourner pour chercher en permanence si d'autres peers plus proches existent
+4. 
+Quand un pokémon apparaît, appliquer paxos pour essayer de l'attraper
