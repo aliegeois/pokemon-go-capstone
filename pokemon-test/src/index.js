@@ -20,6 +20,9 @@ const fog = new Foglet({
 	rps: {
 		type: 'cyclon',
 		options: {
+			delta: 10 * 1000,
+			timeout: 10 * 1000,
+			pendingTimeout: 10 * 1000,
 			protocol: 'my-awesome-broadcast-application', // the name of the protocol run by our app
 			webrtc: { // some WebRTC options
 				trickle: true, // enable trickle
@@ -35,6 +38,10 @@ const fog = new Foglet({
 		name: 'tman',
 		class: TMAN,
 		options: {
+			delta: 10 * 1000,
+			timeout: 10 * 1000,
+			pendingTimeout: 10 * 1000,
+			maxPeers: 10,
 			protocol: 'my-awesome-broadcast-application',
 			signaling: {
 				address: 'http://signaling.herokuapp.com',
@@ -49,6 +56,7 @@ fog.share();
 
 // Connect the foglet to our network
 fog.connection().then(() => {
+	fog.overlay('tman').network.rps._start();
 	document.getElementById('id').innerHTML = fog.id;
 	// listen for broadcast messages
 	fog.onBroadcast((id, message) => {
@@ -74,7 +82,7 @@ document.getElementById('refresh').addEventListener('click', () => {
 	n.appendChild(tr1);
 	const tr2 = document.createElement('tr');
 	const overlayTman = fog.overlay('tman');
-	console.log(overlayTman);
+	console.log(overlayTman.network.getNeighbours());
 	if(!overlayTman)
 		return;
 	for(let neighbour of overlayTman.network.getNeighbours()) {
