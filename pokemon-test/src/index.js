@@ -17,6 +17,31 @@ const fetch = require('node-fetch');
 	});
 });*/
 
+let fog;
+
+let refresh = () => {
+	const n = document.getElementById('neighbours');
+	n.innerHTML = '';
+	const tr1 = document.createElement('tr');
+	for(let neighbour of fog.overlay().network.getNeighbours()) {
+		const td = document.createElement('td');
+		td.innerHTML = neighbour;
+		tr1.appendChild(td);
+	}
+	n.appendChild(tr1);
+	const tr2 = document.createElement('tr');
+	const overlayTman = fog.overlay('tman');
+	// console.log(overlayTman.network.getNeighbours());
+	if(!overlayTman)
+		return;
+	for(let neighbour of overlayTman.network.getNeighbours()) {
+		const td = document.createElement('td');
+		td.innerHTML = neighbour;
+		tr2.appendChild(td);
+	}
+	n.appendChild(tr2);
+};
+
 fetch('https://signaling.herokuapp.com/ice').then(data => data.json()).then(data => {
 	// console.log(data.ice.map(e => {return {...e, urls: e.url}}));
 	let data2 = data.ice.map(e => {
@@ -28,7 +53,7 @@ fetch('https://signaling.herokuapp.com/ice').then(data => data.json()).then(data
 		return e2;
 	});
 	// console.log(data2);
-	const fog = new Foglet({
+	fog = new Foglet({
 		rps: {
 			type: 'cyclon',
 			options: {
@@ -79,34 +104,16 @@ fetch('https://signaling.herokuapp.com/ice').then(data => data.json()).then(data
 		});
 		
 		// send a message in broadcast
-		fog.sendBroadcast('Hello World !');
+		// fog.sendBroadcast('Hello World !');
 	
+		fog.overlay().network.rps.on('open', refresh);
+		fog.overlay().network.rps.on('close', refresh);
+		fog.overlay('tman').network.rps.on('open', refresh);
+		fog.overlay('tman').network.rps.on('close', refresh);
 		// console.log('voisins', fog.overlay().network.getNeighbours());
 	});
 	
-	document.getElementById('refresh').addEventListener('click', () => {
-		// document.getElementById('neighbours').innerHTML = fog.overlay().network.getNeighbours();
-		const n = document.getElementById('neighbours');
-		n.innerHTML = '';
-		const tr1 = document.createElement('tr');
-		for(let neighbour of fog.overlay().network.getNeighbours()) {
-			const td = document.createElement('td');
-			td.innerHTML = neighbour;
-			tr1.appendChild(td);
-		}
-		n.appendChild(tr1);
-		const tr2 = document.createElement('tr');
-		const overlayTman = fog.overlay('tman');
-		console.log(overlayTman.network.getNeighbours());
-		if(!overlayTman)
-			return;
-		for(let neighbour of overlayTman.network.getNeighbours()) {
-			const td = document.createElement('td');
-			td.innerHTML = neighbour;
-			tr2.appendChild(td);
-		}
-		n.appendChild(tr2);
-	});
+	document.getElementById('refresh').addEventListener('click', refresh);
 	
 	
 	window.fog = fog;
