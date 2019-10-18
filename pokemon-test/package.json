@@ -25,7 +25,8 @@
 	},
 	"dependencies": {
 		"foglet-core": "*",
-		"foglet-template": "./paxos-overlays"
+		"foglet-template": "./paxos-overlays",
+		"node-fetch": "^2.6.0"
 	},
 	"scripts": {
 		"start": "webpack-dev-server --mode development --open --hot",
