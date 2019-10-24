@@ -40,6 +40,7 @@ module.exports = class Overlay extends TMAN {
 						myDescriptor.x = message.descriptor.x;
 						myDescriptor.y = message.descriptor.y;
 						myDescriptor.z = message.descriptor.z;
+						this._rps.options.refresh();
 					}
 				}
 			});

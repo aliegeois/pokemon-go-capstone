@@ -18,18 +18,26 @@ let getCurrentPosition = (pos = {x: null, y: null}) => {
 	});
 }
 
+document.getElementById('update').addEventListener('click', () => {
+	updateCurrentPosition({
+		x: document.getElementById('x').value,
+		y: document.getElementById('y').value
+	});
+});
+
 getCurrentPosition().then(position => {
 	start(position);
 
-	setInterval(async () => {
-		updateCurrentPosition(await getCurrentPosition());
-	}, 5 * 1000);
+	// setInterval(async () => {
+	// 	updateCurrentPosition(await getCurrentPosition());
+	// }, 5 * 1000);
 });
 
 let fog;
 
 let updateCurrentPosition = pos => {
 	fog.overlay('tman')._network._rps.options.descriptor = pos;
+	refresh();
 };
 
 let refresh = () => {
@@ -48,15 +56,24 @@ let refresh = () => {
 	// console.log(overlayTman.network.getNeighbours());
 	if(!overlayTman)
 		return;
-	for(let neighbour of overlayTman.network.getNeighbours()) {
+	for(let [id, neighboor] of overlayTman._network._rps.partialView) {
 		const td = document.createElement('td');
-		td.innerHTML = neighbour;
+		td.innerHTML = id + ` - (x: ${neighboor.descriptor.x}, y: ${neighboor.descriptor.y})`;
 		tr2.appendChild(td);
 	}
+	/*for(let neighbour of overlayTman.network.getNeighbours()) {
+		const td = document.createElement('td');
+		console.log(neighbour);
+		td.innerHTML = neighbour;
+		tr2.appendChild(td);
+	}*/
 	n.appendChild(tr2);
 
 	let d = fog.overlay('tman')._network._rps.options.descriptor;
-	p.innerHTML = `My position: (x: ${d.x}, y: ${d.y})`;
+	for(let px of document.getElementsByClassName('pos-x'))
+		px.innerHTML = d.x;
+	for(let py of document.getElementsByClassName('pos-y'))
+		py.innerHTML = d.y;
 };
 
 let start = position => {
@@ -99,13 +116,14 @@ let start = position => {
 					delta: 10 * 1000,
 					timeout: 10 * 1000,
 					pendingTimeout: 10 * 1000,
-					maxPeers: 10,
+					maxPeers: 3,
 					protocol: 'pokestone',
 					signaling: {
 						address: 'https://signaling.herokuapp.com',
 						room: 'pokestone'
 					},
-					position
+					position,
+					refresh
 				}
 			}]
 		});
@@ -136,5 +154,6 @@ let start = position => {
 		
 		
 		window.fog = fog;
+		window.refresh = refresh;
 	});
 };
