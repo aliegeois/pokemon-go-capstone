@@ -3,11 +3,43 @@ const { Foglet } = require('foglet-core');
 const fetch = require('node-fetch');
 const TMAN = require('../paxos-overlays/lib/overlay/overlay.js');
 
-navigator.geolocation.getCurrentPosition(async position => {
-	const x = position.coords.latitude;
-	const y = position.coords.longitude;
-	var map;
-	console.log('data:', {x, y});
+// Ne pas modifier ou déplacer
+document.getElementById('update').addEventListener('click', () => {
+	updateCurrentPosition({
+		x: parseInt(document.getElementById('x').value, 10),
+		y: parseInt(document.getElementById('y').value, 10)
+	});
+});
+
+let marker;
+let markers = {};
+let map;
+
+const icons = {
+	pokeball: {
+		//TODO: faire nos propres icones
+		icon:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnJW8QWOGW4h8cREWdx7gU352re88-07fAQsyD5r6ekEH6SWnSbg&s'
+	}
+};
+
+let getCurrentPosition = (pos = {x: null, y: null}) => {
+	return new Promise((resolve, reject) => {
+		if(pos.x !== null && pos.y !== null) {
+			resolve(pos);
+		} else {
+			navigator.geolocation.getCurrentPosition(position => {
+				resolve({
+					x: position.coords.latitude,
+					y: position.coords.longitude
+				});
+			}, reject);
+		}
+	});
+}
+
+getCurrentPosition().then(position => {
+	const { x, y } = position;
+	// console.log('data:', { x, y });
 	
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {
@@ -18,9 +50,8 @@ navigator.geolocation.getCurrentPosition(async position => {
 		disableDefaultUI: true
 	});
 	
-	map.setOptions({styles: [
-		
-		{
+	map.setOptions({
+		styles: [{
 			featureType: 'water',
 			stylers: [{color:'#00C6D8'}]
 		},
@@ -265,79 +296,59 @@ navigator.geolocation.getCurrentPosition(async position => {
 				]
 			}
 		]*/
-	]});
-	
-	document.getElementById('update').addEventListener('click', () => {
-		updateCurrentPosition({
-			x: document.getElementById('x').value,
-			y: document.getElementById('y').value
-		});
-		map.setOptions({
-			center:{
-				lat: parseInt(document.getElementById('x').value,10),
-				lng: parseInt(document.getElementById('y').value,10)
-			}
-		});
+		]
 	});
 	
-	var icons = {
-		pokeball:{
-			//TODO: faire nos propres icones
-			icon:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnJW8QWOGW4h8cREWdx7gU352re88-07fAQsyD5r6ekEH6SWnSbg&s'
-		}
-	};
-	
-	/*var features = [
-		{
-			position: {lat:x, lng:y}, 
-			type: 'pokeball'
-		}
-	];*/
-	
-	for (var i = 0; i < features.length; i++){
-		var marker = new google.maps.Marker({
-			position:features[i].position,
-			icon: icons[features[i].type].icon,
-			map: map
-		});
-	};
-});
+	// const features = [{
+	// 	position: {
+	// 		lat: x,
+	// 		lng: y
+	// 	}, 
+	// 	type: 'pokeball'
+	// }];
 
-
-let getCurrentPosition = (pos = {x: null, y: null}) => {
-	return new Promise((resolve, reject) => {
-		if(pos.x !== null && pos.y !== null) {
-			resolve(pos);
-		} else {
-			navigator.geolocation.getCurrentPosition(position => {
-				resolve({
-					x: position.coords.latitude,
-					y: position.coords.longitude
-				});
-			}, reject);
-		}
+	marker = new google.maps.Marker({
+		position: {
+			lat: x,
+			lng: y
+		},
+		icon: icons.pokeball.icon,
+		map
 	});
-}
-
-getCurrentPosition().then(position => {
+	
+	// for(let i = 0; i < features.length; i++) {
+	// 	new google.maps.Marker({
+	// 		position: features[i].position,
+	// 		icon: icons[features[i].type].icon,
+	// 		map
+	// 	});
+	// };
+	
 	start(position);
-	
-	// setInterval(async () => {
-	// 	updateCurrentPosition(await getCurrentPosition());
-	// }, 5 * 1000);
 });
 
 let fog;
 
 let updateCurrentPosition = pos => {
 	fog.overlay('tman')._network._rps.options.descriptor = pos;
+	marker.setPosition({
+		lat: pos.x,
+		lng: pos.y
+	});
+	map.setOptions({
+		center: {
+			lat: pos.x,
+			lng: pos.y
+		}
+	});
+
 	refresh();
 };
 
 let refresh = () => {
 	const n = document.getElementById('neighbours');
-	const p = document.getElementById('pos');
 	n.innerHTML = '';
+	
 	const tr1 = document.createElement('tr');
 	for(let neighbour of fog.overlay().network.getNeighbours()) {
 		const td = document.createElement('td');
@@ -347,27 +358,40 @@ let refresh = () => {
 	n.appendChild(tr1);
 	const tr2 = document.createElement('tr');
 	const overlayTman = fog.overlay('tman');
-	// console.log(overlayTman.network.getNeighbours());
+	
 	if(!overlayTman)
-	return;
+		return;
+	
 	for(let [id, neighboor] of overlayTman._network._rps.partialView) {
 		const td = document.createElement('td');
 		td.innerHTML = id + ` - (x: ${neighboor.descriptor.x}, y: ${neighboor.descriptor.y})`;
 		tr2.appendChild(td);
+
+		if(markers[id]) {
+			markers[id].setPosition({
+				lat: neighboor.descriptor.x,
+				lng: neighboor.descriptor.y
+			});
+		} else { // Les markers sont créés mais jamais supprimés
+			markers[id] = new google.maps.Marker({
+				position: {
+					lat: neighboor.descriptor.x,
+					lng: neighboor.descriptor.y
+				},
+				icon: icons.pokeball.icon,
+				map
+			});
+		}
 	}
-	/*for(let neighbour of overlayTman.network.getNeighbours()) {
-		const td = document.createElement('td');
-		console.log(neighbour);
-		td.innerHTML = neighbour;
-		tr2.appendChild(td);
-	}*/
 	n.appendChild(tr2);
 	
 	let d = fog.overlay('tman')._network._rps.options.descriptor;
 	for(let px of document.getElementsByClassName('pos-x'))
-	px.innerHTML = d.x;
+		px.innerHTML = d.x;
 	for(let py of document.getElementsByClassName('pos-y'))
-	py.innerHTML = d.y;
+		py.innerHTML = d.y;
+	
+	
 };
 
 let start = position => {
