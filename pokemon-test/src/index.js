@@ -8,7 +8,7 @@ navigator.geolocation.getCurrentPosition(async position => {
 	const y = position.coords.longitude;
 	var map;
 	console.log('data:', {x, y});
-
+	
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {
 			lat: x,
@@ -19,7 +19,7 @@ navigator.geolocation.getCurrentPosition(async position => {
 	});
 	
 	map.setOptions({styles: [
-
+		
 		{
 			featureType: 'water',
 			stylers: [{color:'#00C6D8'}]
@@ -50,223 +50,223 @@ navigator.geolocation.getCurrentPosition(async position => {
 			elementType: 'labels.text',
 			stylers: [{visibility:'off'}]
 		}
-				/*[
-		{
-			"elementType": "labels",
-			"stylers": [
+		/*[
 			{
-				"visibility": "off"
-			}
-			]
-		},
-		{
-			"featureType": "administrative",
-			"elementType": "geometry",
-			"stylers": [
-			{
-				"visibility": "on"
-			}
-			]
-		},
-		{
-			"featureType": "administrative.country",
-			"elementType": "geometry.fill",
-			"stylers": [
-			{
-				"color": "#fc5061"
+				"elementType": "labels",
+				"stylers": [
+					{
+						"visibility": "off"
+					}
+				]
 			},
 			{
-				"visibility": "on"
+				"featureType": "administrative",
+				"elementType": "geometry",
+				"stylers": [
+					{
+						"visibility": "on"
+					}
+				]
 			},
 			{
-				"weight": 2.5
-			}
-			]
-		},
-		{
-			"featureType": "administrative.land_parcel",
-			"stylers": [
-			{
-				"visibility": "off"
-			}
-			]
-		},
-		{
-			"featureType": "administrative.neighborhood",
-			"stylers": [
-			{
-				"visibility": "off"
-			}
-			]
-		},
-		{
-			"featureType": "landscape.natural",
-			"elementType": "geometry.fill",
-			"stylers": [
-			{
-				"color": "#5bd529"
+				"featureType": "administrative.country",
+				"elementType": "geometry.fill",
+				"stylers": [
+					{
+						"color": "#fc5061"
+					},
+					{
+						"visibility": "on"
+					},
+					{
+						"weight": 2.5
+					}
+				]
 			},
 			{
-				"visibility": "on"
-			}
-			]
-		},
-		{
-			"featureType": "landscape.natural.landcover",
-			"elementType": "geometry",
-			"stylers": [
-			{
-				"color": "#369100"
+				"featureType": "administrative.land_parcel",
+				"stylers": [
+					{
+						"visibility": "off"
+					}
+				]
 			},
 			{
-				"weight": 8
-			}
-			]
-		},
-		{
-			"featureType": "landscape.natural.landcover",
-			"elementType": "geometry.fill",
-			"stylers": [
-			{
-				"visibility": "on"
+				"featureType": "administrative.neighborhood",
+				"stylers": [
+					{
+						"visibility": "off"
+					}
+				]
 			},
 			{
-				"weight": 6.5
-			}
-			]
-		},
-		{
-			"featureType": "poi",
-			"stylers": [
-			{
-				"visibility": "off"
-			}
-			]
-		},
-		{
-			"featureType": "poi",
-			"elementType": "geometry.fill",
-			"stylers": [
-			{
-				"visibility": "on"
+				"featureType": "landscape.natural",
+				"elementType": "geometry.fill",
+				"stylers": [
+					{
+						"color": "#5bd529"
+					},
+					{
+						"visibility": "on"
+					}
+				]
 			},
 			{
-				"weight": 8
-			}
-			]
-		},
-		{
-			"featureType": "poi.attraction",
-			"elementType": "geometry.fill",
-			"stylers": [
-			{
-				"color": "#fc5061"
-			}
-			]
-		},
-		{
-			"featureType": "poi.government",
-			"elementType": "geometry.fill",
-			"stylers": [
-			{
-				"color": "#fc5061"
-			}
-			]
-		},
-		{
-			"featureType": "poi.park",
-			"elementType": "geometry.fill",
-			"stylers": [
-			{
-				"color": "#7ce748"
-			}
-			]
-		},
-		{
-			"featureType": "poi.place_of_worship",
-			"elementType": "geometry.fill",
-			"stylers": [
-			{
-				"color": "#fc5061"
-			}
-			]
-		},
-		{
-			"featureType": "poi.school",
-			"elementType": "geometry.fill",
-			"stylers": [
-			{
-				"visibility": "on"
+				"featureType": "landscape.natural.landcover",
+				"elementType": "geometry",
+				"stylers": [
+					{
+						"color": "#369100"
+					},
+					{
+						"weight": 8
+					}
+				]
 			},
 			{
-				"weight": 8
-			}
-			]
-		},
-		{
-			"featureType": "road",
-			"elementType": "geometry",
-			"stylers": [
+				"featureType": "landscape.natural.landcover",
+				"elementType": "geometry.fill",
+				"stylers": [
+					{
+						"visibility": "on"
+					},
+					{
+						"weight": 6.5
+					}
+				]
+			},
 			{
-				"color": "#f7c510"
-			}
-			]
-		},
-		{
-			"featureType": "road",
-			"elementType": "labels.icon",
-			"stylers": [
+				"featureType": "poi",
+				"stylers": [
+					{
+						"visibility": "off"
+					}
+				]
+			},
 			{
-				"visibility": "off"
-			}
-			]
-		},
-		{
-			"featureType": "road.arterial",
-			"elementType": "labels",
-			"stylers": [
+				"featureType": "poi",
+				"elementType": "geometry.fill",
+				"stylers": [
+					{
+						"visibility": "on"
+					},
+					{
+						"weight": 8
+					}
+				]
+			},
 			{
-				"visibility": "off"
-			}
-			]
-		},
-		{
-			"featureType": "road.highway",
-			"elementType": "labels",
-			"stylers": [
+				"featureType": "poi.attraction",
+				"elementType": "geometry.fill",
+				"stylers": [
+					{
+						"color": "#fc5061"
+					}
+				]
+			},
 			{
-				"visibility": "off"
-			}
-			]
-		},
-		{
-			"featureType": "road.local",
-			"stylers": [
+				"featureType": "poi.government",
+				"elementType": "geometry.fill",
+				"stylers": [
+					{
+						"color": "#fc5061"
+					}
+				]
+			},
 			{
-				"visibility": "off"
-			}
-			]
-		},
-		{
-			"featureType": "transit",
-			"stylers": [
+				"featureType": "poi.park",
+				"elementType": "geometry.fill",
+				"stylers": [
+					{
+						"color": "#7ce748"
+					}
+				]
+			},
 			{
-				"visibility": "off"
-			}
-			]
-		},
-		{
-			"featureType": "water",
-			"elementType": "geometry.fill",
-			"stylers": [
+				"featureType": "poi.place_of_worship",
+				"elementType": "geometry.fill",
+				"stylers": [
+					{
+						"color": "#fc5061"
+					}
+				]
+			},
 			{
-				"color": "#0098b5"
+				"featureType": "poi.school",
+				"elementType": "geometry.fill",
+				"stylers": [
+					{
+						"visibility": "on"
+					},
+					{
+						"weight": 8
+					}
+				]
+			},
+			{
+				"featureType": "road",
+				"elementType": "geometry",
+				"stylers": [
+					{
+						"color": "#f7c510"
+					}
+				]
+			},
+			{
+				"featureType": "road",
+				"elementType": "labels.icon",
+				"stylers": [
+					{
+						"visibility": "off"
+					}
+				]
+			},
+			{
+				"featureType": "road.arterial",
+				"elementType": "labels",
+				"stylers": [
+					{
+						"visibility": "off"
+					}
+				]
+			},
+			{
+				"featureType": "road.highway",
+				"elementType": "labels",
+				"stylers": [
+					{
+						"visibility": "off"
+					}
+				]
+			},
+			{
+				"featureType": "road.local",
+				"stylers": [
+					{
+						"visibility": "off"
+					}
+				]
+			},
+			{
+				"featureType": "transit",
+				"stylers": [
+					{
+						"visibility": "off"
+					}
+				]
+			},
+			{
+				"featureType": "water",
+				"elementType": "geometry.fill",
+				"stylers": [
+					{
+						"color": "#0098b5"
+					}
+				]
 			}
-			]
-		}
 		]*/
 	]});
-
+	
 	document.getElementById('update').addEventListener('click', () => {
 		updateCurrentPosition({
 			x: document.getElementById('x').value,
@@ -279,21 +279,21 @@ navigator.geolocation.getCurrentPosition(async position => {
 			}
 		});
 	});
-
+	
 	var icons = {
 		pokeball:{
 			//TODO: faire nos propres icones
 			icon:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnJW8QWOGW4h8cREWdx7gU352re88-07fAQsyD5r6ekEH6SWnSbg&s'
 		}
 	};
-
+	
 	/*var features = [
 		{
 			position: {lat:x, lng:y}, 
 			type: 'pokeball'
 		}
 	];*/
-
+	
 	for (var i = 0; i < features.length; i++){
 		var marker = new google.maps.Marker({
 			position:features[i].position,
@@ -321,7 +321,7 @@ let getCurrentPosition = (pos = {x: null, y: null}) => {
 
 getCurrentPosition().then(position => {
 	start(position);
-
+	
 	// setInterval(async () => {
 	// 	updateCurrentPosition(await getCurrentPosition());
 	// }, 5 * 1000);
@@ -349,7 +349,7 @@ let refresh = () => {
 	const overlayTman = fog.overlay('tman');
 	// console.log(overlayTman.network.getNeighbours());
 	if(!overlayTman)
-		return;
+	return;
 	for(let [id, neighboor] of overlayTman._network._rps.partialView) {
 		const td = document.createElement('td');
 		td.innerHTML = id + ` - (x: ${neighboor.descriptor.x}, y: ${neighboor.descriptor.y})`;
@@ -362,12 +362,12 @@ let refresh = () => {
 		tr2.appendChild(td);
 	}*/
 	n.appendChild(tr2);
-
+	
 	let d = fog.overlay('tman')._network._rps.options.descriptor;
 	for(let px of document.getElementsByClassName('pos-x'))
-		px.innerHTML = d.x;
+	px.innerHTML = d.x;
 	for(let py of document.getElementsByClassName('pos-y'))
-		py.innerHTML = d.y;
+	py.innerHTML = d.y;
 };
 
 let start = position => {
@@ -433,12 +433,12 @@ let start = position => {
 			fog.onBroadcast((id, message) => {
 				console.log('The peer', id, 'just sent me by broadcast:', message);
 			});
-
+			
 			// console.log('rps', fog.overlay().network.rps);
 			
 			// send a message in broadcast
 			// fog.sendBroadcast('Hello World !');
-		
+			
 			fog.overlay().network.rps.on('open', refresh);
 			fog.overlay().network.rps.on('close', refresh);
 			fog.overlay('tman').network.rps.on('open', refresh);
