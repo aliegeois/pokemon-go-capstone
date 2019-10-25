@@ -274,8 +274,8 @@ navigator.geolocation.getCurrentPosition(async position => {
 		});
 		map.setOptions({
 			center:{
-				lat: document.getElementById('x').value,
-				lng: document.getElementById('y').value
+				lat: parseInt(document.getElementById('x').value,10),
+				lng: parseInt(document.getElementById('y').value,10)
 			}
 		});
 	});
