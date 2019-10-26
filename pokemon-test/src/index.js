@@ -6,8 +6,8 @@ const TMAN = require('../paxos-overlays/lib/overlay/overlay.js');
 // Ne pas modifier ou déplacer
 document.getElementById('update').addEventListener('click', () => {
 	updateCurrentPosition({
-		x: parseInt(document.getElementById('x').value, 10),
-		y: parseInt(document.getElementById('y').value, 10)
+		x: parseFloat(document.getElementById('x').value, 10),
+		y: parseFloat(document.getElementById('y').value, 10)
 	});
 });
 
