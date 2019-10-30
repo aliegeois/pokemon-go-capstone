@@ -64,7 +64,7 @@ getCurrentPosition().then(position => {
 			lat: x,
 			lng: y
 		},
-		zoom: 19,
+		zoom: 17,
 		disableDefaultUI: true,
 		gestureHandling: 'greedy'
 	});
@@ -384,10 +384,6 @@ let refresh = () => {
 	n.appendChild(tr1);
 	const tr2 = document.createElement('tr');
 	const overlayTman = fog.overlay('tman');
-
-	for(var i=0; i<markers.lenght; i++){
-		markers[i].setMap(null)
-	}
 	
 	if(!overlayTman)
 		return;
@@ -501,7 +497,11 @@ let start = position => {
 			fog.overlay().network.rps.on('open', refresh);
 			fog.overlay().network.rps.on('close', refresh);
 			fog.overlay('tman').network.rps.on('open', refresh);
-			fog.overlay('tman').network.rps.on('close', refresh);
+			fog.overlay('tman').network.rps.on('close', (id) => {
+				markers[id] && markers[id].setMap(null);
+				console.log(id);
+				refresh();
+			});
 			// console.log('voisins', fog.overlay().network.getNeighbours());
 
 			console.log('partialView', fog.overlay('tman').network.rps.partialView);
