@@ -21,10 +21,17 @@ let map;
 window.markers = markers;
 
 const icons = {
-	pokeball: {
+	trainer: {
+		icon:'https://cdn.discordapp.com/attachments/627178681428606989/638045396282769431/trainer_v3.png'
+	},
+
+	self: {
 		//TODO: faire nos propres icones
-		// icon:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnJW8QWOGW4h8cREWdx7gU352re88-07fAQsyD5r6ekEH6SWnSbg&s'
-		icon: 'https://cdn.discordapp.com/attachments/627178681428606989/637666290563284995/pokeball_v1.png'
+		icon:'https://cdn.discordapp.com/attachments/627178681428606989/638326088573124618/trainer_v4.png'
+	},
+
+	pokemon: {
+		icon:'https://cdn.discordapp.com/attachments/627178681428606989/637666290563284995/pokeball_v1.png'
 	}
 };
 
@@ -325,7 +332,7 @@ getCurrentPosition().then(position => {
 			lng: y
 		},
 		icon: {
-			url: icons.pokeball.icon,
+			url: icons.self.icon,
 			anchor: new google.maps.Point(16, 16)
 		},
 		map
@@ -377,6 +384,10 @@ let refresh = () => {
 	n.appendChild(tr1);
 	const tr2 = document.createElement('tr');
 	const overlayTman = fog.overlay('tman');
+
+	for(var i=0; i<markers.lenght; i++){
+		markers[i].setMap(null)
+	}
 	
 	if(!overlayTman)
 		return;
@@ -398,7 +409,7 @@ let refresh = () => {
 					lng: neighboor.descriptor.y
 				},
 				icon: {
-					url: icons.pokeball.icon,
+					url: icons.trainer.icon,
 					anchor: new google.maps.Point(16, 16)
 				},
 				map
