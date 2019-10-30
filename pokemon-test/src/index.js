@@ -1,3 +1,6 @@
+/* eslint-env browser */
+/* global google */
+
 // const { paxos, template, target } = require('foglet-template');
 const { Foglet } = require('foglet-core');
 const fetch = require('node-fetch');
@@ -15,13 +18,21 @@ let marker;
 let markers = {};
 let map;
 
+window.markers = markers;
+
 const icons = {
 	pokeball: {
 		//TODO: faire nos propres icones
-		icon:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnJW8QWOGW4h8cREWdx7gU352re88-07fAQsyD5r6ekEH6SWnSbg&s'
+		// icon:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnJW8QWOGW4h8cREWdx7gU352re88-07fAQsyD5r6ekEH6SWnSbg&s'
+		icon: 'https://cdn.discordapp.com/attachments/627178681428606989/637666290563284995/pokeball_v1.png'
 	}
 };
 
+/**
+ * 
+ * @param {{x: Number, y: Number}?} pos 
+ * @returns {Promise<{x: Number, y: Number}>}
+ */
 let getCurrentPosition = (pos = {x: null, y: null}) => {
 	return new Promise((resolve, reject) => {
 		if(pos.x !== null && pos.y !== null) {
@@ -47,7 +58,8 @@ getCurrentPosition().then(position => {
 			lng: y
 		},
 		zoom: 19,
-		disableDefaultUI: true
+		disableDefaultUI: true,
+		gestureHandling: 'greedy'
 	});
 	
 	map.setOptions({
@@ -312,7 +324,10 @@ getCurrentPosition().then(position => {
 			lat: x,
 			lng: y
 		},
-		icon: icons.pokeball.icon,
+		icon: {
+			url: icons.pokeball.icon,
+			anchor: new google.maps.Point(16, 16)
+		},
 		map
 	});
 	
@@ -329,8 +344,12 @@ getCurrentPosition().then(position => {
 
 let fog;
 
+/**
+ * 
+ * @param {{x: Number, y: Number}} pos 
+ */
 let updateCurrentPosition = pos => {
-	fog.overlay('tman')._network._rps.options.descriptor = pos;
+	fog.overlay('tman').network.rps.options.descriptor = pos;
 	marker.setPosition({
 		lat: pos.x,
 		lng: pos.y
@@ -362,7 +381,7 @@ let refresh = () => {
 	if(!overlayTman)
 		return;
 	
-	for(let [id, neighboor] of overlayTman._network._rps.partialView) {
+	for(let [id, neighboor] of overlayTman.network.rps.partialView) {
 		const td = document.createElement('td');
 		td.innerHTML = id + ` - (x: ${neighboor.descriptor.x}, y: ${neighboor.descriptor.y})`;
 		tr2.appendChild(td);
@@ -378,14 +397,17 @@ let refresh = () => {
 					lat: neighboor.descriptor.x,
 					lng: neighboor.descriptor.y
 				},
-				icon: icons.pokeball.icon,
+				icon: {
+					url: icons.pokeball.icon,
+					anchor: new google.maps.Point(16, 16)
+				},
 				map
 			});
 		}
 	}
 	n.appendChild(tr2);
 	
-	let d = fog.overlay('tman')._network._rps.options.descriptor;
+	let d = fog.overlay('tman').network.rps.options.descriptor;
 	for(let px of document.getElementsByClassName('pos-x'))
 		px.innerHTML = d.x;
 	for(let py of document.getElementsByClassName('pos-y'))
@@ -395,7 +417,9 @@ let refresh = () => {
 };
 
 let start = position => {
-	fetch('https://signaling.herokuapp.com/ice').then(data => data.json()).then(data => {
+	fetch('https://signaling.herokuapp.com/ice')
+	.then(data => data.json())
+	.then(data => {
 		// console.log(data.ice.map(e => {return {...e, urls: e.url}}));
 		let data2 = data.ice.map(e => {
 			let e2 = {
@@ -468,6 +492,8 @@ let start = position => {
 			fog.overlay('tman').network.rps.on('open', refresh);
 			fog.overlay('tman').network.rps.on('close', refresh);
 			// console.log('voisins', fog.overlay().network.getNeighbours());
+
+			console.log('partialView', fog.overlay('tman').network.rps.partialView);
 		});
 		
 		

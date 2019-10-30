@@ -24,6 +24,7 @@
 		"webpack-dev-server": "^3.1.10"
 	},
 	"dependencies": {
+		"debug": "^4.1.1",
 		"foglet-core": "*",
 		"foglet-template": "./paxos-overlays",
 		"node-fetch": "^2.6.0"

@@ -1,16 +1,18 @@
-const TMAN = require("./abstract");
-const debug = require("debug")("template:overlay");
-const MUpdateCache = require("./messages/mupdatecache.js");
-const MUpdatePartialView = require("./messages/mupdatepartialview.js");
+const TMAN = require('./abstract');
+const debug = require('debug')('template:overlay');
+const MUpdateCache = require('./messages/mupdatecache.js');
+const MUpdatePartialView = require('./messages/mupdatepartialview.js');
 
 module.exports = class Overlay extends TMAN {
-	constructor(...Args) {
-		super(...Args);
-		debug("Overlay initialized");
+	constructor(...args) {
+		super(...args);
+		debug('Overlay initialized');
 		this.rps._partialViewSize = () => this.options.maxPeers;
 		this.rps._sampleSize = () => this.options.maxPeers;
 		this._setupListener();
 		this._updateCache();
+
+		this.pokemons = {};
 	}
 	
 	/**
@@ -32,16 +34,20 @@ module.exports = class Overlay extends TMAN {
 		const overlay = this.options.pid;
 		setTimeout(() => {
 			this._manager.overlay(overlay).communication.onUnicast((id, message) => {
-				if (message.type === "MUpdateCache") {
+				if (message.type === 'MUpdateCache') {
 					this._rps.cache.set(message.peer, message.descriptor);
 					if (this._rps.partialView.has(message.peer)) {
-						const myDescriptor = this._rps.partialView.get(message.peer)
-						.descriptor;
+						const myDescriptor = this._rps.partialView.get(message.peer).descriptor;
+
 						myDescriptor.x = message.descriptor.x;
 						myDescriptor.y = message.descriptor.y;
 						myDescriptor.z = message.descriptor.z;
+						
 						this._rps.options.refresh();
 					}
+				}
+				if (message.type === 'MSpawnPokemon') {
+
 				}
 			});
 		}, 0.5 * 1000);
@@ -57,13 +63,9 @@ module.exports = class Overlay extends TMAN {
 				.communication.sendUnicast(
 					peerId,
 					new MUpdateCache(this.inviewId, this._rps.options.descriptor)
-				).then().catch(e => {});
+				).then().catch(() => {});
 			});
 		}, 2 * 1000);
-	}
-
-	updateDescriptor(pos = {x: 0, y: 0}) {
-		this._rps.options.descriptor = pos;
 	}
 	
 	/**
@@ -87,7 +89,7 @@ module.exports = class Overlay extends TMAN {
 	* @param {TManOverlay} peerB - (optional) The overlay of the second peer
 	* @return {integer} `0 if peerA == peerB`, `1 if peerA < peerB` and `-1 if peerA > peerB` (according to the ranking algorithm)
 	*/
-	_rankPeers(neighbour, descriptorA, descriptorB, peerA, peerB) {
+	_rankPeers(neighbour, descriptorA, descriptorB) {
 		const getDistance = (descriptor1, descriptor2) => {
 			const { x: xa, y: ya/*, z: za */} = descriptor1;
 			const { x: xb, y: yb/*, z: zb */} = descriptor2;
