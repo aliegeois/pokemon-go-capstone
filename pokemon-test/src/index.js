@@ -22,10 +22,17 @@ let iceServers;
 window.markers = markers;
 
 const icons = {
-	pokeball: {
+	trainer: {
+		icon:'https://cdn.discordapp.com/attachments/627178681428606989/638045396282769431/trainer_v3.png'
+	},
+
+	self: {
 		//TODO: faire nos propres icones
-		// icon:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnJW8QWOGW4h8cREWdx7gU352re88-07fAQsyD5r6ekEH6SWnSbg&s'
-		icon: 'https://cdn.discordapp.com/attachments/627178681428606989/637666290563284995/pokeball_v1.png'
+		icon:'https://cdn.discordapp.com/attachments/627178681428606989/638326088573124618/trainer_v4.png'
+	},
+
+	pokemon: {
+		icon:'https://cdn.discordapp.com/attachments/627178681428606989/637666290563284995/pokeball_v1.png'
 	}
 };
 
@@ -58,7 +65,7 @@ getCurrentPosition().then(position => {
 			lat: x,
 			lng: y
 		},
-		zoom: 19,
+		zoom: 17,
 		disableDefaultUI: true,
 		gestureHandling: 'greedy'
 	});
@@ -326,7 +333,7 @@ getCurrentPosition().then(position => {
 			lng: y
 		},
 		icon: {
-			url: icons.pokeball.icon,
+			url: icons.self.icon,
 			anchor: new google.maps.Point(16, 16)
 		},
 		map
@@ -441,7 +448,7 @@ let refresh = () => {
 					lng: neighboor.descriptor.y
 				},
 				icon: {
-					url: icons.pokeball.icon,
+					url: icons.trainer.icon,
 					anchor: new google.maps.Point(16, 16)
 				},
 				map
@@ -534,7 +541,11 @@ let start = position => {
 			fog.overlay().network.rps.on('open', refresh);
 			fog.overlay().network.rps.on('close', refresh);
 			fog.overlay('tman').network.rps.on('open', refresh);
-			fog.overlay('tman').network.rps.on('close', refresh);
+			fog.overlay('tman').network.rps.on('close', (id) => {
+				markers[id] && markers[id].setMap(null);
+				console.log(id);
+				refresh();
+			});
 			// console.log('voisins', fog.overlay().network.getNeighbours());
 		});
 		
