@@ -47,7 +47,7 @@ module.exports = class Overlay extends TMAN {
 					}
 				}
 				if (message.type === 'MSpawnPokemon') {
-
+					this._rps.options.spawnPokemon(message.pokemon);
 				}
 			});
 		}, 0.5 * 1000);
