@@ -518,7 +518,20 @@ let start = position => {
 					refresh,
 					spawnPokemon
 				}
-			}]
+			},
+				{
+					name: 'pokoverlay',
+					class: POKOVERLAY,
+					options: {
+						protocol: 'pokestone',
+						signaling: {
+							address: 'https://signaling.herokuapp.com',
+							room: 'pokestone'
+						}
+					},
+					position,
+					refresh
+				}]
 		});
 		
 		// connect the foglet to the signaling server
