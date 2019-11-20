@@ -1,5 +1,3 @@
-// const FC = require("foglet-core");
-const Foglet = FC.Foglet;
 const lmerge = require("lodash.merge");
 const debug = require("debug")("template");
 
