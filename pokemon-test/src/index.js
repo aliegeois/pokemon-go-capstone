@@ -5,6 +5,7 @@
 const { Foglet } = require('foglet-core');
 const fetch = require('node-fetch');
 const TMAN = require('../paxos-overlays/lib/overlay/overlay.js');
+const POKOVERLAY = require('../paxos-overlays/lib/overlay/pokemonOverlay.js')
 
 // Ne pas modifier ou déplacer
 /*document.getElementById('update').addEventListener('click', () => {
@@ -18,6 +19,7 @@ const TMAN = require('../paxos-overlays/lib/overlay/overlay.js');
 let marker;
 let markers = {};
 let map;
+let iceServers;
 
 window.markers = markers;
 
@@ -305,6 +307,48 @@ let updateCurrentPosition = pos => {
 	refresh();
 };
 
+let spawnPokemon = pokemon => {
+	const pokefog = new Foglet({
+		rps: {
+			type: 'cyclon',
+			options: {
+				delta: 10 * 1000,
+				timeout: 10 * 1000,
+				pendingTimeout: 30 * 1000,
+				protocol: `pokemon-${pokemon.id}`, // the name of the protocol run by our app
+				webrtc: { // some WebRTC options
+					trickle: true, // enable trickle
+					// iceServers : data.ice, // define iceServers here if you want to run this code outside localhost
+					config: {
+						iceServers: iceServers
+					}
+				},
+				signaling: { // configure the signaling server
+					address: 'https://signaling.herokuapp.com', // put the URL of the signaling server here
+					room: `pokemon-${pokemon.id}` // the name of the room for the peers of our application
+				}
+			}
+		}
+	});
+
+	pokefog.share();
+
+	pokefog.connection().then(() => {
+		pokefog.overlay().network.rps.on('open', e => {
+			console.log('wesh les mecs', e);
+		});
+	});
+};
+
+let customSpawn = () => {
+	for(let peerId of fog.overlay('tman').network.rps.getPeers()) {
+		fog.overlay('tman').communication.sendUnicast(peerId, {
+			type: 'MSpawnPokemon',
+			id: Math.floor(Math.random() * Math.pow(2, 10))
+		});
+	}
+};
+
 let refresh = () => {
 	const n = document.getElementById('neighbours');
 	n.innerHTML = '';
@@ -433,7 +477,7 @@ let start = position => {
 		})
 
 		// console.log(data.ice.map(e => {return {...e, urls: e.url}}));
-		let data2 = data.ice.map(e => {
+		iceServers = data.ice.map(e => {
 			let e2 = {
 				...e,
 				urls: e.url
@@ -454,7 +498,7 @@ let start = position => {
 						trickle: true, // enable trickle
 						// iceServers : data.ice, // define iceServers here if you want to run this code outside localhost
 						config: {
-							iceServers: data2
+							iceServers: iceServers
 						}
 					},
 					signaling: { // configure the signaling server
@@ -477,9 +521,23 @@ let start = position => {
 						room: 'pokestone'
 					},
 					position,
-					refresh
+					refresh,
+					spawnPokemon
 				}
-			}]
+			},
+				{
+					name: 'pokoverlay',
+					class: POKOVERLAY,
+					options: {
+						protocol: 'pokestone',
+						signaling: {
+							address: 'https://signaling.herokuapp.com',
+							room: 'pokestone'
+						}
+					},
+					position,
+					refresh
+				}]
 		});
 		
 		// connect the foglet to the signaling server
@@ -512,8 +570,6 @@ let start = position => {
 				refresh();
 			});
 			// console.log('voisins', fog.overlay().network.getNeighbours());
-
-			console.log('partialView', fog.overlay('tman').network.rps.partialView);
 		});
 		
 		
