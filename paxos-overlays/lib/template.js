@@ -1,9 +1,10 @@
 const FC = require("foglet-core");
+
 const Foglet = FC.Foglet;
 const lmerge = require("lodash.merge");
 const debug = require("debug")("template");
 const EventEmitter = require("events");
-const MUpdatePartialView = require("./overlay/messages/mupdatepartialview.js");
+// const MUpdatePartialView = require("./overlay/messages/mupdatepartialview.js");
 
 class Template extends EventEmitter {
   constructor(options, moc = false) {

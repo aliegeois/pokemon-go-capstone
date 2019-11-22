@@ -410,7 +410,7 @@ let customSpawn = () => {
 	for(let peerId of fog.overlay('tman').network.rps.getPeers()) {
 		fog.overlay('tman').communication.sendUnicast(peerId, {
 			type: 'MSpawnPokemon',
-			id: Math.floor(Math.random() * Math.pow(2, 10))
+			id: Math.floor(Math.random() * Math.pow(2, 16))
 		});
 	}
 };
@@ -493,11 +493,11 @@ let start = position => {
 						trickle: true, // enable trickle
 						// iceServers : data.ice, // define iceServers here if you want to run this code outside localhost
 						config: {
-							iceServers: iceServers
+							iceServers: []
 						}
 					},
 					signaling: { // configure the signaling server
-						address: 'https://signaling.herokuapp.com', // put the URL of the signaling server here
+						address: 'localhost:3000', // put the URL of the signaling server here
 						room: 'pokestone' // the name of the room for the peers of our application
 					}
 				}
@@ -512,7 +512,7 @@ let start = position => {
 					maxPeers: 3,
 					protocol: 'pokestone',
 					signaling: {
-						address: 'https://signaling.herokuapp.com',
+						address: 'localhost:3000',
 						room: 'pokestone'
 					},
 					position,

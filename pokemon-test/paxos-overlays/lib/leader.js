@@ -15,13 +15,12 @@ class Leader {
 
     this.leaderOfCible = new Map();
 
-    this.ranking = (neighbor, callkack) => (a, b) => {
+    this.ranking = neighbor => (a, b) => {
       const getDistance = (descriptor1, descriptor2) => {
-        const { x: xa, y: ya, z: za } = descriptor1;
-        const { x: xb, y: yb, z: zb } = descriptor2;
+        const { x: xa, y: ya } = descriptor1;
+        const { x: xb, y: yb } = descriptor2;
         const dx = xa - xb;
         const dy = ya - yb;
-        const dz = za - zb;
         return Math.sqrt(dx * dx + dy * dy);
       };
 
@@ -38,7 +37,7 @@ class Leader {
       return distanceA - distanceB;
     };
     this.doLeaderElection();
-    let period = setInterval(() => {
+    setInterval(() => {
       this.doLeaderElection();
     }, delta);
   }

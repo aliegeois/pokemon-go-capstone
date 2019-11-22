@@ -1,7 +1,7 @@
-const TMAN = require('./abstract');
 const debug = require('debug')('template:overlay');
+const TMAN = require('./abstract');
 const MUpdateCache = require('./messages/mupdatecache.js');
-const MUpdatePartialView = require('./messages/mupdatepartialview.js');
+// const MUpdatePartialView = require('./messages/mupdatepartialview.js');
 
 module.exports = class Overlay extends TMAN {
 	constructor(...args) {
@@ -50,7 +50,7 @@ module.exports = class Overlay extends TMAN {
 					this._rps.options.spawnPokemon(message.pokemon);
 				}
 			});
-		}, 0.5 * 1000);
+		}, delay);
 	}
 	
 	_updateCache(delay = this.options.delta) {
@@ -65,7 +65,7 @@ module.exports = class Overlay extends TMAN {
 					new MUpdateCache(this.inviewId, this._rps.options.descriptor)
 				).then().catch(() => {});
 			});
-		}, 2 * 1000);
+		}, delay);
 	}
 	
 	/**
