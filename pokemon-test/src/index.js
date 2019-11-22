@@ -5,15 +5,16 @@
 const { Foglet } = require('foglet-core');
 const fetch = require('node-fetch');
 const TMAN = require('../paxos-overlays/lib/overlay/overlay.js');
-const POKOVERLAY = require('../paxos-overlays/lib/overlay/pokemonOverlay.js')
+const POKOVERLAY = require('./pokemonOverlay.js')
 
 // Ne pas modifier ou déplacer
-document.getElementById('update').addEventListener('click', () => {
+/*document.getElementById('update').addEventListener('click', () => {
 	updateCurrentPosition({
 		x: parseFloat(document.getElementById('x').value, 10),
 		y: parseFloat(document.getElementById('y').value, 10)
 	});
-});
+});*/
+
 
 let marker;
 let markers = {};
@@ -45,12 +46,17 @@ const icons = {
 let getCurrentPosition = (pos = {x: null, y: null}) => {
 	return new Promise((resolve, reject) => {
 		if(pos.x !== null && pos.y !== null) {
-			resolve(pos);
+			resolve({
+				x: pos.x,
+				y: pos.y,
+				name: "Jean Billy"
+			});
 		} else {
 			navigator.geolocation.getCurrentPosition(position => {
 				resolve({
 					x: position.coords.latitude,
-					y: position.coords.longitude
+					y: position.coords.longitude,
+					name: "Jean Billy"
 				});
 			}, reject);
 		}
@@ -72,252 +78,153 @@ getCurrentPosition().then(position => {
 	});
 	
 	map.setOptions({
-		styles: [{
-			featureType: 'water',
-			stylers: [{color:'#00C6D8'}]
-		},
-		{
-			featureType: 'road.local',
-			stylers: [{color: '#E4C52A'}]
-		},
-		{
-			featureType: 'landscape.natural',
-			stylers: [{color:'#7CE748'}]
-		},
-		{
-			featureType: 'landscape.natural.terrain',
-			stylers: [{color:'#5BD529'}]
-		},
-		{
-			featureType: 'administrative.land_parcel',
-			stylers: [{color:'#FC5061'}]
-		},
-		{
-			featureType: 'all',
-			elementType: 'labels.icon',
-			stylers: [{visibility: 'off'}]
-		},
-		{
-			featureType: 'all',
-			elementType: 'labels.text',
-			stylers: [{visibility:'off'}]
-		}
-		/*[
+		styles: [
 			{
-				"elementType": "labels",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
+			  "elementType": "labels",
+			  "stylers": [
+				{
+				  "visibility": "off"
+				}
+			  ]
 			},
 			{
-				"featureType": "administrative",
-				"elementType": "geometry",
-				"stylers": [
-					{
-						"visibility": "on"
-					}
-				]
+			  "elementType": "labels.icon",
+			  "stylers": [
+				{
+				  "visibility": "off"
+				}
+			  ]
 			},
 			{
-				"featureType": "administrative.country",
-				"elementType": "geometry.fill",
-				"stylers": [
-					{
-						"color": "#fc5061"
-					},
-					{
-						"visibility": "on"
-					},
-					{
-						"weight": 2.5
-					}
-				]
+			  "featureType": "landscape.man_made",
+			  "elementType": "geometry.fill",
+			  "stylers": [
+				{
+				  "color": "#a2c081"
+				}
+			  ]
 			},
 			{
-				"featureType": "administrative.land_parcel",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
+			  "featureType": "landscape.natural",
+			  "elementType": "geometry.fill",
+			  "stylers": [
+				{
+				  "color": "#8cb75d"
+				}
+			  ]
 			},
 			{
-				"featureType": "administrative.neighborhood",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
+			  "featureType": "poi.medical",
+			  "elementType": "geometry.fill",
+			  "stylers": [
+				{
+				  "color": "#ff0000"
+				}
+			  ]
 			},
 			{
-				"featureType": "landscape.natural",
-				"elementType": "geometry.fill",
-				"stylers": [
-					{
-						"color": "#5bd529"
-					},
-					{
-						"visibility": "on"
-					}
-				]
+			  "featureType": "poi.park",
+			  "elementType": "geometry.fill",
+			  "stylers": [
+				{
+				  "color": "#97c367"
+				}
+			  ]
 			},
 			{
-				"featureType": "landscape.natural.landcover",
-				"elementType": "geometry",
-				"stylers": [
-					{
-						"color": "#369100"
-					},
-					{
-						"weight": 8
-					}
-				]
+			  "featureType": "poi.sports_complex",
+			  "elementType": "geometry.fill",
+			  "stylers": [
+				{
+				  "color": "#bc2f2f"
+				},
+				{
+				  "weight": 1.5
+				}
+			  ]
 			},
 			{
-				"featureType": "landscape.natural.landcover",
-				"elementType": "geometry.fill",
-				"stylers": [
-					{
-						"visibility": "on"
-					},
-					{
-						"weight": 6.5
-					}
-				]
+			  "featureType": "poi.sports_complex",
+			  "elementType": "geometry.stroke",
+			  "stylers": [
+				{
+				  "color": "#898779"
+				}
+			  ]
 			},
 			{
-				"featureType": "poi",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
+			  "featureType": "road.arterial",
+			  "elementType": "geometry",
+			  "stylers": [
+				{
+				  "color": "#d9d5ba"
+				}
+			  ]
 			},
 			{
-				"featureType": "poi",
-				"elementType": "geometry.fill",
-				"stylers": [
-					{
-						"visibility": "on"
-					},
-					{
-						"weight": 8
-					}
-				]
+			  "featureType": "road.arterial",
+			  "elementType": "geometry.fill",
+			  "stylers": [
+				{
+				  "color": "#bcbaa7"
+				}
+			  ]
 			},
 			{
-				"featureType": "poi.attraction",
-				"elementType": "geometry.fill",
-				"stylers": [
-					{
-						"color": "#fc5061"
-					}
-				]
+			  "featureType": "road.highway",
+			  "elementType": "geometry.fill",
+			  "stylers": [
+				{
+				  "color": "#ffdf00"
+				}
+			  ]
 			},
 			{
-				"featureType": "poi.government",
-				"elementType": "geometry.fill",
-				"stylers": [
-					{
-						"color": "#fc5061"
-					}
-				]
+			  "featureType": "road.highway",
+			  "elementType": "geometry.stroke",
+			  "stylers": [
+				{
+				  "color": "#898779"
+				}
+			  ]
 			},
 			{
-				"featureType": "poi.park",
-				"elementType": "geometry.fill",
-				"stylers": [
-					{
-						"color": "#7ce748"
-					}
-				]
+			  "featureType": "road.local",
+			  "elementType": "geometry.fill",
+			  "stylers": [
+				{
+				  "color": "#eae182"
+				}
+			  ]
 			},
 			{
-				"featureType": "poi.place_of_worship",
-				"elementType": "geometry.fill",
-				"stylers": [
-					{
-						"color": "#fc5061"
-					}
-				]
+			  "featureType": "transit.line",
+			  "elementType": "geometry.stroke",
+			  "stylers": [
+				{
+				  "color": "#898779"
+				}
+			  ]
 			},
 			{
-				"featureType": "poi.school",
-				"elementType": "geometry.fill",
-				"stylers": [
-					{
-						"visibility": "on"
-					},
-					{
-						"weight": 8
-					}
-				]
+			  "featureType": "transit.station",
+			  "elementType": "geometry.stroke",
+			  "stylers": [
+				{
+				  "color": "#898779"
+				}
+			  ]
 			},
 			{
-				"featureType": "road",
-				"elementType": "geometry",
-				"stylers": [
-					{
-						"color": "#f7c510"
-					}
-				]
-			},
-			{
-				"featureType": "road",
-				"elementType": "labels.icon",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
-			},
-			{
-				"featureType": "road.arterial",
-				"elementType": "labels",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
-			},
-			{
-				"featureType": "road.highway",
-				"elementType": "labels",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
-			},
-			{
-				"featureType": "road.local",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
-			},
-			{
-				"featureType": "transit",
-				"stylers": [
-					{
-						"visibility": "off"
-					}
-				]
-			},
-			{
-				"featureType": "water",
-				"elementType": "geometry.fill",
-				"stylers": [
-					{
-						"color": "#0098b5"
-					}
-				]
+			  "featureType": "water",
+			  "elementType": "geometry.fill",
+			  "stylers": [
+				{
+				  "color": "#679bc3"
+				}
+			  ]
 			}
-		]*/
-		]
+		  ]
 	});
 	
 	// const features = [{
@@ -351,14 +258,41 @@ getCurrentPosition().then(position => {
 	start(position);
 });
 
+const contentPlayer = document.createElement('div');
+
 let fog;
+
+function getId() {
+	if(!getId.resolvers)
+		getId.resolvers = [];
+
+	if(getId.id)
+		return new Promise(resolve => {
+			resolve(getId.id);
+		});
+	else
+		return new Promise(resolve => {
+			getId.resolvers.push(resolve);
+		});
+}
+getId.setId = id => {
+	getId.id = id;
+	if(getId.resolvers)
+		for(let resolver of getId.resolvers)
+			resolver(id);
+	//delete getId.resolvers;
+};
 
 /**
  * 
  * @param {{x: Number, y: Number}} pos 
+			document.getElementsByClassName("id").forlement => {
+				
+			});
  */
 let updateCurrentPosition = pos => {
-	fog.overlay('tman').network.rps.options.descriptor = pos;
+	fog.overlay('tman').network.rps.options.descriptor.x = pos.x;
+	fog.overlay('tman').network.rps.options.descriptor.y = pos.y;
 	marker.setPosition({
 		lat: pos.x,
 		lng: pos.y
@@ -407,6 +341,7 @@ let spawnPokemon = pokemon => {
 };
 
 let customSpawn = () => {
+	console.log('Bonjour la méthode customSpawn est exécutée lol')
 	for(let peerId of fog.overlay('tman').network.rps.getPeers()) {
 		fog.overlay('tman').communication.sendUnicast(peerId, {
 			type: 'MSpawnPokemon',
@@ -415,10 +350,14 @@ let customSpawn = () => {
 	}
 };
 
+let euclideanDist = (x1, y1, x2, y2) => {
+	return Math.hypot(Math.abs(x1-x2),Math.abs(y1-y2));
+}
+
 let refresh = () => {
 	const n = document.getElementById('neighbours');
 	n.innerHTML = '';
-	
+
 	const tr1 = document.createElement('tr');
 	for(let neighbour of fog.overlay().network.getNeighbours()) {
 		const td = document.createElement('td');
@@ -454,6 +393,23 @@ let refresh = () => {
 				},
 				map
 			});
+
+			var contentString = '<div id="content">'+
+            '<div id="siteNotice">'+
+            '</div>'+
+            '<h1 id="firstHeading" class="firstHeading">Billy</h1>'+
+            '<div id="bodyContent">'+
+			'<p><b>Le joueur Billy</b> est un dresseur pokemon'+
+			'<p><b>Coordonnées</b> : '+ neighboor.descriptor.x + ', '+ neighboor.descriptor.y +
+            '</div>'+
+			'</div>';
+			
+	 		var infowindow = new google.maps.InfoWindow({
+          		content: contentString
+    		});
+			markers[id].addListener('click', function() {
+				infowindow.open(map, markers[id]);
+			  });
 		}
 	}
 	n.appendChild(tr2);
@@ -463,6 +419,8 @@ let refresh = () => {
 		px.innerHTML = d.x;
 	for(let py of document.getElementsByClassName('pos-y'))
 		py.innerHTML = d.y;
+	for(let pname of document.getElementsByClassName('name'))
+		pname.innerHTML = d.name;
 	
 	
 };
@@ -471,6 +429,74 @@ let start = position => {
 	fetch('https://signaling.herokuapp.com/ice')
 	.then(data => data.json())
 	.then(data => {
+
+		contentPlayer.innerHTML = '<h1> <span class="name"></span></h1>';
+
+		let span = document.createElement('span');
+		span.className = 'id';
+		
+		contentPlayer.innerHTML += '<div>id: '
+		contentPlayer.appendChild(span);
+		contentPlayer.innerHTML += ' </div>'+
+		'<div>My position: (x: <span class="pos-x"></span>, y: <span class="pos-y"></span>)</div>'
+
+		var xInput = contentPlayer.appendChild(document.createElement('input'));
+		xInput.type = 'text';
+		xInput.id = 'xDynamic';
+
+		var yInput = contentPlayer.appendChild(document.createElement('input'));
+		yInput.type = 'text';
+		yInput.id = 'yDynamic';
+
+		var button = contentPlayer.appendChild(document.createElement('input'));
+		button.type = 'button';
+		button.id = 'updateDynamic';
+		button.value = 'update';
+		button.addEventListener('click', () => {
+			updateCurrentPosition({
+				x: parseFloat(document.getElementById('xDynamic').value, 10),
+				y: parseFloat(document.getElementById('yDynamic').value, 10)
+			});
+		});
+
+		var xPokeInput = contentPlayer.appendChild(document.createElement('input'));
+		xPokeInput.type = 'text';
+		xPokeInput.id = 'xPokeDynamic';
+
+		var yPokeInput = contentPlayer.appendChild(document.createElement('input'));
+		yPokeInput.type = 'text';
+		yPokeInput.id = 'yPokeDynamic';
+
+		var pokebutton = contentPlayer.appendChild(document.createElement('input'));
+		pokebutton.type = 'button';
+		pokebutton.id = 'updatePokeDynamic';
+		pokebutton.value = 'spawn';
+		pokebutton.addEventListener('click', () => {
+			customSpawn();
+		});
+
+		let config = {
+			content: contentPlayer
+		};
+
+		var infoPlayer = new google.maps.InfoWindow(config);
+
+		marker.addListener('click', function(){
+			
+			infoPlayer.close();
+
+			// infoPlayer = new google.maps.InfoWindow({
+			// 	content : contentPlayer
+			// });
+			getId().then(id => {
+				for(let el of config.content.getElementsByClassName('id')){
+					//console.log(el)
+					el.innerHTML = id;
+				}
+			});
+			infoPlayer.open(map, marker);
+		})
+
 		// console.log(data.ice.map(e => {return {...e, urls: e.url}}));
 		iceServers = data.ice.map(e => {
 			let e2 = {
@@ -541,7 +567,11 @@ let start = position => {
 		// Connect the foglet to our network
 		fog.connection().then(() => {
 			fog.overlay('tman').network.rps._start();
-			document.getElementById('id').innerHTML = fog.id;
+			getId.setId(fog.id);
+			console.log(getId.id);
+			for(let truc of document.getElementsByClassName('id')){
+				truc.innerHTML = fog.id
+			}
 			// listen for broadcast messages
 			fog.onBroadcast((id, message) => {
 				console.log('The peer', id, 'just sent me by broadcast:', message);
