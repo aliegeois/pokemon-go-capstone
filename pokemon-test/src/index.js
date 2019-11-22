@@ -341,6 +341,7 @@ let spawnPokemon = pokemon => {
 };
 
 let customSpawn = () => {
+	console.log('Bonjour la méthode customSpawn est exécutée lol')
 	for(let peerId of fog.overlay('tman').network.rps.getPeers()) {
 		fog.overlay('tman').communication.sendUnicast(peerId, {
 			type: 'MSpawnPokemon',
@@ -348,6 +349,10 @@ let customSpawn = () => {
 		});
 	}
 };
+
+let euclideanDist = (x1, y1, x2, y2) => {
+	return Math.hypot(Math.abs(x1-x2),Math.abs(y1-y2));
+}
 
 let refresh = () => {
 	const n = document.getElementById('neighbours');
@@ -452,6 +457,22 @@ let start = position => {
 				x: parseFloat(document.getElementById('xDynamic').value, 10),
 				y: parseFloat(document.getElementById('yDynamic').value, 10)
 			});
+		});
+
+		var xPokeInput = contentPlayer.appendChild(document.createElement('input'));
+		xPokeInput.type = 'text';
+		xPokeInput.id = 'xPokeDynamic';
+
+		var yPokeInput = contentPlayer.appendChild(document.createElement('input'));
+		yPokeInput.type = 'text';
+		yPokeInput.id = 'yPokeDynamic';
+
+		var pokebutton = contentPlayer.appendChild(document.createElement('input'));
+		pokebutton.type = 'button';
+		pokebutton.id = 'updatePokeDynamic';
+		pokebutton.value = 'spawn';
+		pokebutton.addEventListener('click', () => {
+			customSpawn();
 		});
 
 		let config = {
