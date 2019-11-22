@@ -5,7 +5,7 @@
 const { Foglet } = require('foglet-core');
 const fetch = require('node-fetch');
 const TMAN = require('../paxos-overlays/lib/overlay/overlay.js');
-const POKOVERLAY = require('../paxos-overlays/lib/overlay/pokemonOverlay.js')
+const POKOVERLAY = require('./pokemonOverlay.js')
 
 // Ne pas modifier ou déplacer
 /*document.getElementById('update').addEventListener('click', () => {
