@@ -1,12 +1,9 @@
-const FC = require("foglet-core");
-
-const Foglet = FC.Foglet;
 const lmerge = require("lodash.merge");
 const debug = require("debug")("template");
-const EventEmitter = require("events");
-// const MUpdatePartialView = require("./overlay/messages/mupdatepartialview.js");
 
-class Template extends EventEmitter {
+const { Foglet } = require('foglet-core');
+
+class PokeFoglet extends Foglet {
   constructor(options, moc = false) {
     super();
     this.options = lmerge(
@@ -94,31 +91,6 @@ class Template extends EventEmitter {
     });
   }
 
-  /*connection(template = undefined, overlay = undefined) {
-    if (!overlay && !!template) return this.foglet.connection(template.foglet);
-    if (overlay) {
-      this.foglet.share();
-      return this.foglet.connection(template, overlay);
-    }
-    return Promise.reject();
-  }*/
-
-  connection(template, overlay = null) {
-    if (template) return this.foglet.connection(template.foglet, overlay);
-    this.foglet.share();
-    return this.foglet.connection(null, overlay);
-  }
-
-  sendUnicast(id, message) {
-    return this.foglet.sendUnicast(id, message);
-  }
-
-  sendUnicastAll(message) {
-    this.neighbours().forEach(peer => {
-      this.sendUnicast(peer, message);
-    });
-  }
-
   sendOverlayUnicast(overlay, id, message) {
     message.context = overlay;
     return this.foglet.overlay(overlay).communication.sendUnicast(id, message);
@@ -130,44 +102,11 @@ class Template extends EventEmitter {
     });
   }
 
-  neighbours() {
-    return this.foglet.getNeighbours();
-  }
-
   neighboursOverlay(overlay) {
     return this.foglet.overlay(overlay).network.getNeighbours();
   }
 
-  updateDescriptor(descriptor, overlay) {
-    this.descriptor.x = descriptor.x;
-    this.descriptor.y = descriptor.y;
-    this.descriptor.z = descriptor.z;
-
-    // TOCHANGE
-    if (!overlay) {
-      return console.log("please specify an overlay");
-    }
-
-    let myDescriptor = this.descriptor;
-
-    if (this.foglet.overlay(overlay)) {
-      myDescriptor = this.foglet.overlay(
-        overlay
-      ).network.descriptor = this.foglet.overlay(
-        overlay
-      ).network.options.descriptor;
-
-      myDescriptor.x = descriptor.x;
-      myDescriptor.y = descriptor.y;
-      myDescriptor.z = descriptor.z;
-    }
-
-    this.emit("descriptor-updated", {
-      id: this.foglet.inViewID,
-      descriptor: myDescriptor
-    });
-  }
-
+  //Utilisé dans un eventemitter
   buildOverlay(overlay) {
     this.foglet._networkManager._buildOverlay(overlay);
     this.foglet.overlay(overlay.name).network.rps.on("open", id => {
@@ -186,6 +125,7 @@ class Template extends EventEmitter {
     return Promise.resolve();
   }
 
+  //Utilisé dans un eventemitter
   leaveOverlay(overlay, target) {
     this.foglet
       .overlay(overlay)
@@ -201,48 +141,6 @@ class Template extends EventEmitter {
     return Promise.resolve();
   }
 
-  targetSpawned(target) {
-    // TOCHANGE
-    this.targets.push(target);
-    let nearby = target.isNearby(this.getDescriptor());
-    if (!nearby) return false;
-    this.buildOverlay(
-      lmerge(target.getOverlay(), {
-        options: { descriptor: this.getDescriptor() }
-      })
-    );
-    this.emit("target-spawned", target.id);
-    return nearby;
-  }
-
-  getLeader(overlay) {
-    const leader = this.foglet.overlay(overlay).network.options.target.leader;
-    return leader;
-  }
-  getDescriptor() {
-    return this.descriptor;
-  }
-  setDescriptor(descriptor) {
-    this.descriptor = descriptor;
-  }
-
-  getOverlays() {
-    return Array.from(this.foglet._networkManager._overlays.keys());
-  }
-
-  handleUnicast(overlay) {
-    this.foglet.overlay(overlay).communication.onUnicast((id, message) => {
-      if (!message.type && !message.context) return;
-      const eventHandlers = this.handlers[overlay][message.type];
-
-      if (eventHandlers && Array.isArray(eventHandlers)) {
-        eventHandlers.forEach(handler => {
-          handler(id, message);
-        });
-      }
-    });
-  }
-
   addHandler(event, handler, overlay) {
     if (!this.handlers[overlay]) {
       this.handlers[overlay] = {};
@@ -255,4 +153,4 @@ class Template extends EventEmitter {
   }
 }
 
-module.exports = Template;
+module.exports = PokeFoglet;
