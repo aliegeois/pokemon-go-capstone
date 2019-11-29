@@ -90,6 +90,7 @@ module.exports = class Overlay extends TMAN {
 	* @return {integer} `0 if peerA == peerB`, `1 if peerA < peerB` and `-1 if peerA > peerB` (according to the ranking algorithm)
 	*/
 	_rankPeers(neighbour, descriptorA, descriptorB) {
+		console.log('neightbour', neighbour);
 		const getDistance = (descriptor1, descriptor2) => {
 			const { x: xa, y: ya/*, z: za */} = descriptor1;
 			const { x: xb, y: yb/*, z: zb */} = descriptor2;

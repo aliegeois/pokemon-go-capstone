@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 // import { Query } from "services/Client";
 import { withStyles, Grid, Paper } from "@material-ui/core";
 // import withFogletTemplate from "services/FogletTemplate";
-import withFoglet from "services/FogletLeVrai";
+import withFoglet from "services/FogletTemplate";
 
 import { Trainer, Pokemon } from "./components/Forms";
 import Box from "./components/Box";
