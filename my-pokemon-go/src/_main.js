@@ -2,12 +2,11 @@ import { Foglet } from 'foglet-core';
 import fetch from 'node-fetch';
 import uuid from 'uuid/v4';
 
-import Pokemon from './overlay/Pokemon';
-import TMan from './overlay/TMan';
-
 import AbstractNetwork from 'foglet-core/src/network/abstract/abstract-network';
 import Network from 'foglet-core/src/network/network';
 
+// import Pokemon from './overlay/Pokemon';
+import TMan from './overlay/TMan';
 
 /**
  * Mêt à jour le contenu de tous les éléments html ayant une certaine classe
@@ -29,8 +28,26 @@ function spawnPokemon(name, x, y) {
 	node.overlay('tman').network.spawnPokemon({ name, x, y });
 }
 
+function showNeighbours() {
+	/** @type {Map} */
+	const neighbours = node.overlay('tman').network.getNeighbours();
+
+	const tr = document.createElement('tr');
+	for(let neighbour of neighbours) {
+		const td = document.createElement('td');
+		td.innerHTML = neighbour;
+		tr.appendChild(td);
+	}
+	while(neighboursTable.lastElementChild)
+		neighboursTable.removeChild(neighboursTable.lastElementChild);
+	neighboursTable.appendChild(tr);
+}
+
 /** @type {Foglet} */
 let node;
+/** @type {HTMLTableElement} */
+const neighboursTable = document.getElementById('neighbours');
+console.log('$', neighboursTable);
 
 addEventListener('DOMContentLoaded', () => {
 	console.log('fetching ice servers');
@@ -75,7 +92,7 @@ addEventListener('DOMContentLoaded', () => {
 						delta: 10 * 1000,
 						timeout: 100 * 1000, // for join
 						pendingTimeout: 10 * 1000,
-						maxPeers: 3,
+						maxPeers: 50,
 						protocol: 'pokestone',
 						signaling: {
 							address: 'https://signaling.herokuapp.com',
@@ -102,6 +119,7 @@ addEventListener('DOMContentLoaded', () => {
 				});*/
 
 				node.overlay().network.rps.once('open', peerId => {
+					// node.connection(node, 'tman');
 					node.overlay('tman').network.rps._start();
 					// node.overlay('tman').network.rps.join(peerId)
 					// 	.then(console.warn)
@@ -113,15 +131,19 @@ addEventListener('DOMContentLoaded', () => {
 				// });
 
 				node.overlay().network.rps.on('open', peerId => {
+					showNeighbours();
 					console.log('rps open', peerId);
 				});
 				node.overlay().network.rps.on('close', peerId => {
+					showNeighbours();
 					console.log('rps close', peerId);
 				});
 				node.overlay('tman').network.rps.on('open', peerId => {
+					showNeighbours();
 					console.log('tman open', peerId);
 				});
 				node.overlay('tman').network.rps.on('close', peerId => {
+					showNeighbours();
 					console.log('tman close', peerId);
 				});
 				// console.log(node.overlay('tman').network);
@@ -149,7 +171,7 @@ addEventListener('DOMContentLoaded', () => {
 	});
 
 	document.getElementById('join-overlay').addEventListener('click', () => {
-		const overlayName = document.getElementById('input-overlay-name').value;
+		/*const overlayName = document.getElementById('input-overlay-name').value;
 
 		if (!overlayName)
 			return;
@@ -171,7 +193,7 @@ addEventListener('DOMContentLoaded', () => {
 			}
 		});
 
-		node.share(overlayName);
+		node.share(overlayName);*/
 	});
 
 	document.getElementById('spawn-pokemon').addEventListener('click', () => {

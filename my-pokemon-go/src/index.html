@@ -3,7 +3,14 @@
 <html lang="fr">
 	<head>
 		<meta charset="UTF-8" />
-		<link rel="stylesheet" href="style.css" />
+		<style>
+			.info {
+				margin-bottom: 15px;
+			}
+			table, td {
+				border: 1px solid black;
+			}
+		</style>
 		<title>My Pokemon Go</title>
 	</head>
 	<body>
@@ -18,16 +25,12 @@
 			x: <input type="number" id="input-pos-x" /> y: <input type="number" id="input-pos-y" /> <button id="update-position">Update</button>
 		</div>
 		<div class="info">
-			<strong>Join overlay</strong><br />
-			name: <input id="input-overlay-name" type="text" /> <button id="join-overlay">Join</button>
-		</div>
-		<div class="info">
 			<strong>Spawn pokemon</strong><br />
 			name: <input id="input-pokemon-name" type="text" /> x: <input id="input-pokemon-x" type="number" /> y: <input id="input-pokemon-y" type="number" /> <button id="spawn-pokemon">Spawn</button>
 		</div>
 
 		<table id="neighbours"></table>
 
-		<script src="main.js"></script>
+		<table id="visible-pokemons"></table>
 	</body>
 </html>

@@ -1,9 +1,14 @@
-import uuid from 'uuid/v4';
+// import uuid from 'uuid/v4';
+
+import { Foglet } from 'foglet-core';
+import NetworkManager from 'foglet-core/src/network/network-manager';
 
 import TManOverlay from './TManOverlay';
-import Pokemon from './Pokemon';
-
-import NetworkManager from 'foglet-core/src/network/network-manager';
+import Message from '../consensus/Message';
+import Pokemon from '../Pokemon';
+import euclidianDistance from '../euclidianDistance';
+import Paxos from '../consensus/Paxos';
+import Consensus from '../consensus/Consensus';
 
 export default class TMan extends TManOverlay {
 	/**
@@ -14,31 +19,20 @@ export default class TMan extends TManOverlay {
 		super(networkManager, options);
 
 		console.log('this', this);
+
+		this.visiblePokemons = new Map();
 		// networkManager.overlay('tman').network.rps.join().then(console.info);
 		// console.log('rps', this._rps);
-		this.rps.unicast.on('pokemon-spawned', ({ overlayName, pokemon }) => {
-			console.log('pokemon spawned', { name: pokemon.name, x: pokemon.x, y: pokemon.y }, overlayName);
-
-			const overlayConfig = {
-				name: overlayName,
-				class: Pokemon,
-				options: {
-					pid: overlayName,
-					delta: 10 * 1000,
-					timeout: 10 * 1000,
-					pendingTimeout: 10 * 1000,
-					maxPeers: Infinity,
-					protocol: 'pokestone',
-					signaling: {
-						address: 'https://signaling.herokuapp.com',
-						room: overlayName
-					}
-				}
-			};
-
-			this._manager._buildOverlay(overlayConfig);
-			// console.log('benis', this._manager.overlay(overlayName).network.rps);
-			this._manager.overlay(overlayName).network.rps._start();
+		this.rps.unicast.on('pokemon-spawned', ({ peerId, pokemon }) => {
+			// this.emit('pokemon-spawned', pokemon);
+			console.log('pokemon', pokemon, ' spawned (', peerId, ')');
+			this.visiblePokemons.set(pokemon.id, new Consensus(options.node, 'tman', pokemon, leader => {
+				console.log('elected leader:', leader);
+			}));
+		});
+		this.rps.unicast.on('pokemon-catched', ({ peerId, pokemon }) => {
+			// this.emit('pokemon-catched', pokemon);
+			console.log('Pokemon', pokemon.id, 'catched by', peerId);
 		});
 
 		this.rps.unicast.on('update-descriptor', ({ peerId, descriptor }) => {
@@ -46,6 +40,13 @@ export default class TMan extends TManOverlay {
 			// console.log('received updated descriptor from', peerId, descriptor);
 		});
 
+		this.rps.unicast
+			.on(Message.START, message => { this.emit(Message.START, message) })
+			.on(Message.PREPARE, message => { this.emit(Message.PREPARE, message) })
+			.on(Message.ACKNOWLEDGE, message => { this.emit(Message.ACKNOWLEDGE, message) })
+			.on(Message.PROPOSE, message => { this.emit(Message.PROPOSE, message) })
+			.on(Message.ACCEPT, message => { this.emit(Message.ACCEPT, message) })
+			.on(Message.DECIDE, message => { this.emit(Message.DECIDE, message) });
 
 
 
@@ -62,43 +63,28 @@ export default class TMan extends TManOverlay {
 			for (let [peerId] of this.rps.partialView) {
 				this.rps.unicast.emit('update-descriptor', peerId, {
 					peerId: this.rps.parent.options.peer,
-					descriptor: this._rps.options.descriptor
+					descriptor: this.rps.options.descriptor
 				});
 				// console.log(`send updated descriptor to ${peerId}`);
 			}
-		}, 50 * 1000);
+		}, 10 * 1000);
 	}
 
-	spawnPokemon(pokemon) {
-		const overlayName = `pokemon-${uuid()}`,
-			overlayConfig = {
-				name: overlayName,
-				class: Pokemon,
-				options: {
-					pid: overlayName,
-					delta: 10 * 1000,
-					timeout: 10 * 1000,
-					pendingTimeout: 10 * 1000,
-					maxPeers: Infinity,
-					protocol: 'pokestone',
-					signaling: {
-						address: 'https://signaling.herokuapp.com',
-						room: overlayName
-					}
-				}
-			};
-
-		this._manager._buildOverlay(overlayConfig);
-		// console.log('benis', this._manager.overlay(overlayName).network.rps);
-		this._manager.overlay(overlayName).network.rps._start();
-
-
-		for (let [peerId] of this.rps.partialView) {
-			this.rps.unicast.emit('pokemon-spawned', peerId, {
-				peerId: this.rps.parent.options.peer,
-				overlayName,
-				pokemon
-			});
+	/**
+	 * @param {Foglet} node 
+	 * @param {Pokemon} pokemon 
+	 */
+	spawnPokemon(node, pokemon) {
+		this.visiblePokemons.set(pokemon.id, new Consensus(node, 'tman', pokemon, leader => {
+			console.log('elected leader is', leader);
+		}));
+		for (let [peerId, {descriptor}] of this.rps.partialView) {
+			if(euclidianDistance(this._rps.options.descriptor, descriptor) <= this.options.range) {
+				this.rps.unicast.emit('pokemon-spawned', peerId, {
+					peerId: this.rps.inViewID,
+					pokemon
+				});
+			}
 		}
 	}
 
@@ -121,17 +107,8 @@ export default class TMan extends TManOverlay {
 	 * @param {{x: number, y: number}} descriptorB 
 	 */
 	_rankPeers(neighbour, descriptorA, descriptorB) {
-		const getDistance = (descriptor1, descriptor2) => {
-			const { x: xa, y: ya } = descriptor1;
-			const { x: xb, y: yb } = descriptor2;
-			const dx = xa - xb;
-			const dy = ya - yb;
-			// const dz = za - zb;
-			return Math.sqrt(dx * dx + dy * dy);
-			//return Math.sqrt(dx * dx + dy * dy + dz * dz);
-		};
-		const distanceA = getDistance(neighbour.descriptor, descriptorA);
-		const distanceB = getDistance(neighbour.descriptor, descriptorB);
+		const distanceA = euclidianDistance(neighbour.descriptor, descriptorA);
+		const distanceB = euclidianDistance(neighbour.descriptor, descriptorB);
 
 		if (distanceA === distanceB) {
 			if (descriptorA.x >= descriptorB.x) {
