@@ -6,13 +6,16 @@
 	},
 	"extends": "eslint:recommended",
 	"parserOptions": {
-		"ecmaVersion": 2018,
+		"ecmaVersion": 11,
 		"sourceType": "module"
 	},
 	"rules": {
 		"indent": [
 			"error",
-			"tab"
+			"tab",
+			{
+				"SwitchCase": 1
+			}
 		],
 		"quotes": [
 			"error",

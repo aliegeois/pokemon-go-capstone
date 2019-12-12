@@ -22,7 +22,7 @@ function update(type, value) {
  * @param {number} y Position y
  */
 function spawnPokemon(name, x, y) {
-	node.overlay('tman').network.spawnPokemon(node, new Pokemon(name, x, y));
+	node.overlay('tman').network.spawnPokemon(new Pokemon(name, x, y));
 	// node.overlay('tman').network.rps.unicast.emit('pokemon-spawned');
 	/*new Consensus(node, 'tman', new Pokemon(name, x, y), leader => {
 		console.log('leader is ', leader);
@@ -77,7 +77,7 @@ function showPokemons() {
 		buttonCatch.innerHTML = 'Catch';
 		buttonCatch.addEventListener('click', () => {
 			consensus.catch().then(peer => {
-				console.log(`The peer ${peer} has catched ${consensus.pokemon.name}`)
+				console.log(`The peer ${peer} has catched ${consensus.pokemon.name}`);
 			})
 		});
 		tdCatch.appendChild(buttonCatch);
@@ -151,6 +151,7 @@ addEventListener('DOMContentLoaded', () => {
 			node.share();
 
 			node.connection().then(() => {
+				node.overlay('tman').network.node = node;
 				console.log('foglet initialized', node);
 				update('id', node.id);
 
@@ -166,6 +167,7 @@ addEventListener('DOMContentLoaded', () => {
 				node.overlay().network.rps.once('open', peerId => {
 					// node.connection(node, 'tman');
 					node.overlay('tman').network.rps._start();
+					node.overlay('tman').network._options.node = node;
 
 					showNeighbours();
 					console.log('rps open', peerId);

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import fogletCore from 'foglet-core';
-import Network from 'foglet-core/src/network/network';
+// import Network from 'foglet-core/src/network/network';
 // import tmanwrtc from 'tman-wrtc';
 // import TManOverlay from '../overlay/TMan';
 import euclidianDistance from '../euclidianDistance';
@@ -11,7 +11,7 @@ import euclidianDistance from '../euclidianDistance';
 // const tmanwrtc = require('tman-wrtc');
 // const TManOverlay = require('../overlay/TMan.js');
 
-const Foglet = fogletCore.Foglet;
+// const Foglet = fogletCore.Foglet;
 const AbstractNetwork = fogletCore.abstract.rps;
 
 export default class Leader {
@@ -25,6 +25,9 @@ export default class Leader {
 		this.leader = null;
 
 		/** @private */
+		this._overlay = overlay;
+
+		/** @private */
 		const ranking = neighbour => (a, b) => {
 			const distanceA = euclidianDistance(neighbour, a);
 			const distanceB = euclidianDistance(neighbour, b);
@@ -34,7 +37,7 @@ export default class Leader {
 			else
 				return distanceA - distanceB;
 		};
-		
+
 		const rps = overlay.network.rps;
 		/** @type {Map.<string, {peer: string, descriptor: {x: number, y: number}}>} */
 		const partialView = rps.partialView;
@@ -47,16 +50,17 @@ export default class Leader {
 		});
 		descriptors.push({
 			...rps.options.descriptor,
-			peer: overlay.inViewID
+			peer: rps.inViewID
 		});
-		console.log(descriptors);
+		console.log('leaders', descriptors);
 		descriptors.sort(ranking(pokemon));
 		this.leader = descriptors[0];
+		console.log('leader', this.leader);
 		callback(this.leader);
 	}
 
 	/** @returns {boolean} */
 	get isLeader() {
-		return this.leader ? this.leader.peer == this.foglet.inViewID : false;
+		return this.leader && this.leader.peer === this._overlay.network.rps.NI.PEER;
 	}
 }

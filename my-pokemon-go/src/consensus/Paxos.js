@@ -1,20 +1,21 @@
-import { Foglet } from 'foglet-core';
+import { abstract } from 'foglet-core';
 
 import Leader from './Leader';
 
 import Message from './Message';
 import Ballot from './Ballot';
 
+const AbstractNetwork = abstract.rps;
+
 const DELTA = 2000;
 
 export default class Paxos {
 	/**
-	 * @param {Foglet} node 
-	 * @param {Network} overlayName
+	 * @param {AbstractNetwork} overlay
 	 * @param {{id: string, position: {x: number, y: number}}} target 
 	 * @param {function(string, {x: number, y: number, peer: string}): void} onLeader Méthode appelée quand le consensus est terminé
 	 */
-	constructor(node, overlayName, target, onLeader) {
+	constructor(overlay, target, onLeader) {
 		/** @private */
 		this._progression = {
 			initialValue: null,
@@ -28,21 +29,44 @@ export default class Paxos {
 			decided: null
 		};
 		/** @private */
-		this._node = node;
+		this._overlay = overlay;
 		/** @private */
 		this._target = target;
 		/** @private */
-		this._candidate = new Leader(overlayName, target, onLeader);
+		this._candidate = new Leader(overlay, target, onLeader);
 		/** @type {AbstractNetwork} @private */
-		this._overlayName = overlayName;
+		//this._overlayName = overlayName;
 
-		node.overlay(overlayName).network
+		overlay.communication.onUnicast((id, message) => {
+			switch (message.type) {
+				case Message.START:
+					this._prepare(id, message);
+					break;
+				case Message.PREPARE:
+					this._acknowledge(id, message);
+					break;
+				case Message.ACKNOWLEDGE:
+					this._propose(id, message);
+					break;
+				case Message.PROPOSE:
+					this._accept(id, message);
+					break;
+				case Message.ACCEPT:
+					this._decide(id, message);
+					break;
+				case Message.DECIDE:
+					this._decided(id, message);
+					break;
+			}
+		});
+
+		/*node.overlay(overlayName).network
 			.on(Message.START, this._prepare.bind(this))
 			.on(Message.PREPARE, this._acknowledge.bind(this))
 			.on(Message.ACKNOWLEDGE, this._propose.bind(this))
 			.on(Message.PROPOSE, this._accept.bind(this))
 			.on(Message.ACCEPT, this._decide.bind(this))
-			.on(Message.DECIDE, this._decided.bind(this));
+			.on(Message.DECIDE, this._decided.bind(this));*/
 
 		/*this.foglet.addHandler(
 			Message.START,
@@ -80,12 +104,14 @@ export default class Paxos {
 	}
 
 	start(resolver = null) {
+		console.log('starting paxos');
 		/** @private */
 		this._resolver = resolver;
-		const leader = this._candidate.leader;
-		if (!leader)
+		console.log(this._candidate);
+		if (!this._candidate.isLeader)
 			return;
-		const myId = this._node.inViewID;
+		const leader = this._candidate.leader;
+		const myId = this._overlay.network.inViewID;
 		const message = new Message(Message.START, {
 			pid: myId,
 			cible: 'tman'
@@ -94,7 +120,8 @@ export default class Paxos {
 		if (leader.peer === myId) {
 			this._prepare(myId, message);
 		} else {
-			this._node.overlay(this._overlayName).communication.sendUnicast(leader.peer, message);
+			this._overlay.communication.sendUnicast(leader.peer, message);
+			// this._node.overlay(this._overlayName).communication.sendUnicast(leader.peer, message);
 			/*this.foglet.sendOverlayUnicast(
 				this.overlay,
 				leader.peer,
@@ -114,7 +141,7 @@ export default class Paxos {
 		this._progression.initialValue = message.content;
 		Ballot.setPid(
 			this._progression.ballot,
-			this._node.inViewID
+			this._overlay.network.inViewID
 		);
 		this._sendPrepare();
 		this.periodic = setInterval(() => {
@@ -135,10 +162,10 @@ export default class Paxos {
 			ballot,
 			maxPeers: this._progression.maxPeers
 		});
-		for (let peer of this._node.overlay(this._overlayName).network.getNeighbours())
-			this._node.overlay(this._overlayName).communication.sendUnicast(peer, message);
+		for (let peer of this._overlay.network.getNeighbours())
+			this._overlay.communication.sendUnicast(peer, message);
 		// this.foglet.sendOverlayUnicastAll(this.overlay, message);
-		this._acknowledge(this._node.inViewID, message);
+		this._acknowledge(this._overlay.network.inViewID, message);
 	}
 
 	/**
@@ -160,10 +187,10 @@ export default class Paxos {
 				acceptedValue: this._progression.acceptedValue
 			});
 
-			if (id === this._node.inViewID) {
-				this._propose(this._node.inViewID, answer);
+			if (id === this._overlay.network.inViewID) {
+				this._propose(this._overlay.network.inViewID, answer);
 			} else {
-				this._node.overlay(this._overlayName).communication.sendUnicast(ballot.pid, answer);
+				this._overlay.communication.sendUnicast(ballot.pid, answer);
 				/*this.foglet.sendOverlayUnicast(
 					this.overlay,
 					ballot.pid,
@@ -201,9 +228,9 @@ export default class Paxos {
 				value
 			});
 			// this.foglet.sendOverlayUnicastAll(this.overlay, message);
-			for (let peer of this._node.overlay(this._overlayName).network.getNeighbours())
-				this._node.overlay(this._overlayName).communication.sendUnicast(peer, message);
-			this._accept(this._node.inViewID, message);
+			for (let peer of this._overlay.network.getNeighbours())
+				this._overlay.communication.sendUnicast(peer, message);
+			this._accept(this._overlay.network.inViewID, message);
 		}
 	}
 
@@ -225,9 +252,9 @@ export default class Paxos {
 				value: this._progression.acceptedValue
 			});
 			// this.foglet.sendOverlayUnicastAll(this.overlay, message);
-			for (let peer of this._node.overlay(this._overlayName).network.getNeighbours())
-				this._node.overlay(this._overlayName).communication.sendUnicast(peer, message);
-			this._decide(this._node.inViewID, message);
+			for (let peer of this._overlay.network.getNeighbours())
+				this._overlay.communication.sendUnicast(peer, message);
+			this._decide(this._overlay.network.inViewID, message);
 		}
 	}
 
@@ -254,9 +281,9 @@ export default class Paxos {
 		// Normalement setInterval, mais pour tester je fais qu'une seule fois
 		const answer = new Message(Message.DECIDE, { value });
 		// this.foglet.sendOverlayUnicastAll(this.overlay, answer);
-		for (let peer of this._node.overlay(this._overlayName).network.getNeighbours())
-			this._node.overlay(this._overlayName).communication.sendUnicast(peer, answer);
-		this._decided(this._node.inViewID, answer);
+		for (let peer of this._overlay.network.getNeighbours())
+			this._overlay.communication.sendUnicast(peer, answer);
+		this._decided(this._overlay.network.inViewID, answer);
 	}
 
 	/**
@@ -265,6 +292,7 @@ export default class Paxos {
 	 * @private
 	 */
 	_decided(id, message) {
+		console.log('decided');
 		if (this._progression.decided)
 			return;
 		const { value } = message.content;
