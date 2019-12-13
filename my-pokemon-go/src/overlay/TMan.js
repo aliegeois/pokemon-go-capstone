@@ -83,26 +83,26 @@ export default class TMan extends TManOverlay {
 			// console.log('received updated descriptor from', peerId, descriptor);
 		});
 
-		setInterval(() => {
-			console.log(" *** PEERS ***");
-			let nbOfPeers = 0
+		/*setInterval(() => {
+			console.log(' *** PEERS ***');
+			let nbPeers = 0;
 			for (let [peerId, {descriptor}] of this.rps.partialView) {
 				console.log(peerId);
 				const x1 = this.descriptor.x;
 				const y1 = this.descriptor.y;
-				const x2 = descriptor.x;
-				const y2 = descriptor.x;
+				const x2 = this.rps.options.descriptor.x;
+				const y2 = this.rps.options.descriptor.y;
 				if (Math.hypot(Math.abs(x1 - x2), Math.abs(y1 - y2)) < 10)
-					nbOfPeers++;
+					nbPeers++;
 			}
-			let p = 0.1*(nbOfPeers+1);
+			let p = 1 / (nbPeers + 1);
 			let r = Math.random();
 			console.log(r);
 			console.log(p);
 			if (r < p)
-				this.spawnPokemon(new Pokemon("Evoli", 0, 0));
-			console.log(" *** peers ***");
-		}, 10 * 1000);
+				this.spawnPokemon(new Pokemon('Evoli', 0, 0));
+			console.log(' *** peers ***');
+		}, 10 * 1000);*/
 
 		setInterval(() => {
 			for (let [peerId] of this.rps.partialView) {
