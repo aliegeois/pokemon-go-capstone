@@ -142,7 +142,7 @@ addEventListener('DOMContentLoaded', () => {
 							room: 'pokeroom'
 						},
 						range: Infinity,
-						node
+						pid: 'tman'
 					}
 				}]
 			});

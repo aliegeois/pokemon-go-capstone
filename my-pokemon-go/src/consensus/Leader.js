@@ -26,19 +26,26 @@ export default class Leader {
 
 		/** @private */
 		this._overlay = overlay;
+		/** @private */
+		this._pokemon = pokemon;
+		/** @private */
+		this._callback = callback;
 
 		/** @private */
-		const ranking = neighbour => (a, b) => {
+		this._ranking = neighbour => (a, b) => {
 			const distanceA = euclidianDistance(neighbour, a);
 			const distanceB = euclidianDistance(neighbour, b);
-
 			if (distanceA === distanceB)
-				return a.id >= b.id ? 1 : -1;
+				return a.peer >= b.peer ? 1 : -1;
 			else
 				return distanceA - distanceB;
 		};
 
-		const rps = overlay.network.rps;
+		this.doLeaderElection();
+	}
+
+	doLeaderElection() {
+		const rps = this._overlay.network.rps;
 		/** @type {Map.<string, {peer: string, descriptor: {x: number, y: number}}>} */
 		const partialView = rps.partialView;
 		/** @type {{peer: string, x: number, y: number}[]} */
@@ -50,17 +57,17 @@ export default class Leader {
 		});
 		descriptors.push({
 			...rps.options.descriptor,
-			peer: rps.inViewID
+			peer: this._overlay.network.inviewId
 		});
 		console.log('leaders', descriptors);
-		descriptors.sort(ranking(pokemon));
+		descriptors.sort(this._ranking(this._pokemon.position));
 		this.leader = descriptors[0];
 		console.log('leader', this.leader);
-		callback(this.leader);
+		this._callback(this.leader);
 	}
 
 	/** @returns {boolean} */
-	get isLeader() {
-		return this.leader && this.leader.peer === this._overlay.network.rps.NI.PEER;
+	isLeader() {
+		return this.leader && this.leader.peer === this._overlay.network.inviewId;
 	}
 }

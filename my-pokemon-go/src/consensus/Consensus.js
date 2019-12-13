@@ -9,9 +9,11 @@ export default class Consensus {
 	 * @param {function(string, {x: number, y: number, peer: string}): void} onLeader 
 	 */
 	constructor(overlay, pokemon, onLeader) {
-		console.log('consensus', overlay);
+		console.log('consensus', this);
+		/** @private */
 		this._pokemon = pokemon;
-		this.paxos = new Paxos(overlay, pokemon, onLeader);
+		/** @private */
+		this._paxos = new Paxos(overlay, pokemon, onLeader);
 	}
 
 	get pokemon() {
@@ -22,6 +24,6 @@ export default class Consensus {
 	 * @return {Promise}
 	 */
 	catch() {
-		return new Promise(resolve => this.paxos.start(resolve));
+		return new Promise(resolve => this._paxos.start(resolve));
 	}
 }

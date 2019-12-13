@@ -10,6 +10,13 @@ import euclidianDistance from '../euclidianDistance';
 // import Paxos from '../consensus/Paxos';
 import Consensus from '../consensus/Consensus';
 
+class LoggableMap extends Map {
+	set(key, value) {
+		console.log(value);
+		super.set(key, value);
+	}
+}
+
 export default class TMan extends TManOverlay {
 	/**
 	 * 
@@ -18,11 +25,11 @@ export default class TMan extends TManOverlay {
 	constructor(networkManager, options) {
 		super(networkManager, options);
 
-		console.log('this', this);
+		console.log('tman', this);
 
-		this.visiblePokemons = new Map();
+		/** @type {Map.<string, Pokemon>} */
+		this.visiblePokemons = new LoggableMap();
 
-		console.log('node', options.node);
 		// networkManager.overlay('tman').network.rps.join().then(console.info);
 		// console.log('rps', this._rps);
 		/*this.communication.onUnicast((id, message) => {
@@ -35,7 +42,7 @@ export default class TMan extends TManOverlay {
 		});*/
 		this.rps.unicast.on('pokemon-spawned', message => {
 			console.log(message.peerId + ' said that a pokemon has spawned');
-			this.visiblePokemons.set(message.pokemon.id, new Consensus(this.node.overlay('tman'), message.pokemon, leader => {
+			this.visiblePokemons.set(message.pokemon.id, new Consensus(this._manager.overlay(options.pid), message.pokemon, leader => {
 				console.log('elected leader:', leader);
 			}));
 		});
@@ -51,10 +58,7 @@ export default class TMan extends TManOverlay {
 			console.log('Pokemon', pokemon.id, 'catched by', peerId);
 		});
 
-		this.rps.unicast.on('update-descriptor', ({ peerId, descriptor }) => {
-			this.rps.cache.set(peerId, descriptor);
-			// console.log('received updated descriptor from', peerId, descriptor);
-		});
+
 
 		/*this.rps.unicast
 			.on(Message.START, message => { this.emit(Message.START, message) })
@@ -63,7 +67,6 @@ export default class TMan extends TManOverlay {
 			.on(Message.PROPOSE, message => { this.emit(Message.PROPOSE, message) })
 			.on(Message.ACCEPT, message => { this.emit(Message.ACCEPT, message) })
 			.on(Message.DECIDE, message => { this.emit(Message.DECIDE, message) });*/
-
 
 
 		// console.log('?', this._manager);
@@ -75,10 +78,15 @@ export default class TMan extends TManOverlay {
 		// console.log('partialView', this._rps.partialView);
 		// console.log('network', this._rps._network);
 
+		this.rps.unicast.on('update-descriptor', ({ peerId, descriptor }) => {
+			this.rps.cache.set(peerId, descriptor);
+			// console.log('received updated descriptor from', peerId, descriptor);
+		});
+
 		setInterval(() => {
 			for (let [peerId] of this.rps.partialView) {
 				this.rps.unicast.emit('update-descriptor', peerId, {
-					peerId: this.rps.NI.PEER,
+					peerId: this.inviewId,
 					descriptor: this.rps.options.descriptor
 				});
 				// console.log(`send updated descriptor to ${peerId}`);
@@ -90,20 +98,20 @@ export default class TMan extends TManOverlay {
 	 * @param {Pokemon} pokemon 
 	 */
 	spawnPokemon(pokemon) {
-		this.visiblePokemons.set(pokemon.id, new Consensus(this.node.overlay('tman'), pokemon, leader => {
+		this.visiblePokemons.set(pokemon.id, new Consensus(this._manager.overlay(this.options.pid), pokemon, leader => {
 			console.log('elected leader is', leader);
 		}));
-		for (let [peerId, {descriptor}] of this.rps.partialView) {
-			if(euclidianDistance(this.rps.options.descriptor, descriptor) <= this.options.range) {
-				console.log('emit', 'pokemon-spawned', peerId, this.rps.NI.PEER, pokemon);
+		for (let [peerId, { descriptor }] of this.rps.partialView) {
+			if (euclidianDistance(this.rps.options.descriptor, descriptor) <= this.options.range) {
+				console.log('emit', 'pokemon-spawned', peerId, this.inviewId, pokemon);
 				this.rps.unicast.emit('pokemon-spawned', peerId, {
-					peerId: this.rps.NI.PEER,
+					peerId: this.inviewId,
 					pokemon
 				});
 			}
 		}
-		
-		
+
+
 		/*this.visiblePokemons.set(pokemon.id, new Consensus(node, 'tman', pokemon, leader => {
 			console.log('elected leader is', leader);
 		}));
@@ -132,20 +140,22 @@ export default class TMan extends TManOverlay {
 
 	/**
 	 * @private
-	 * @param {*} neighbour 
+	 * @param {{x: number, y: number}} neighbour 
 	 * @param {{x: number, y: number}} descriptorA 
 	 * @param {{x: number, y: number}} descriptorB 
+	 * @returns {number}
 	 */
 	_rankPeers(neighbour, descriptorA, descriptorB) {
 		const distanceA = euclidianDistance(neighbour.descriptor, descriptorA);
 		const distanceB = euclidianDistance(neighbour.descriptor, descriptorB);
 
 		if (distanceA === distanceB) {
-			if (descriptorA.x >= descriptorB.x) {
+			return descriptorA.x >= descriptorB.x ? -1 : 1;
+			/*if (descriptorA.x >= descriptorB.x) {
 				return -1;
 			} else if (descriptorA.x < descriptorB.x) {
 				return 1;
-			}
+			}*/
 		}
 		return distanceA - distanceB;
 	}

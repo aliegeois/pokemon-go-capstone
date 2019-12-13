@@ -1,7 +1,6 @@
 import { abstract } from 'foglet-core';
 
 import Leader from './Leader';
-
 import Message from './Message';
 import Ballot from './Ballot';
 
@@ -34,275 +33,295 @@ export default class Paxos {
 		this._target = target;
 		/** @private */
 		this._candidate = new Leader(overlay, target, onLeader);
-		/** @type {AbstractNetwork} @private */
-		//this._overlayName = overlayName;
 
-		overlay.communication.onUnicast((id, message) => {
-			switch (message.type) {
-				case Message.START:
-					this._prepare(id, message);
-					break;
-				case Message.PREPARE:
-					this._acknowledge(id, message);
-					break;
-				case Message.ACKNOWLEDGE:
-					this._propose(id, message);
-					break;
-				case Message.PROPOSE:
-					this._accept(id, message);
-					break;
-				case Message.ACCEPT:
-					this._decide(id, message);
-					break;
-				case Message.DECIDE:
-					this._decided(id, message);
-					break;
-			}
-		});
 
-		/*node.overlay(overlayName).network
-			.on(Message.START, this._prepare.bind(this))
-			.on(Message.PREPARE, this._acknowledge.bind(this))
-			.on(Message.ACKNOWLEDGE, this._propose.bind(this))
-			.on(Message.PROPOSE, this._accept.bind(this))
-			.on(Message.ACCEPT, this._decide.bind(this))
-			.on(Message.DECIDE, this._decided.bind(this));*/
 
-		/*this.foglet.addHandler(
-			Message.START,
-			this.prepare.bind(this),
-			this.overlay
-		);
-
-		this.foglet.addHandler(
-			Message.PREPARE,
-			this.acknowledge.bind(this),
-			this.overlay
-		);
-		this.foglet.addHandler(
-			Message.ACKNOWLEDGE,
-			this.propose.bind(this),
-			this.overlay
-		);
-
-		this.foglet.addHandler(
-			Message.PROPOSE,
-			this.accept.bind(this),
-			this.overlay
-		);
-
-		this.foglet.addHandler(
-			Message.ACCEPT,
-			this.decide.bind(this),
-			this.overlay
-		);
-		this.foglet.addHandler(
-			Message.DECIDE,
-			this.decided.bind(this),
-			this.overlay
-		);*/
+		this._overlay.network.rps.unicast.on(Message.START, message => { this._prepare(message.pid, message) })
+			.on(Message.PREPARE, message => { this._acknowledge(message.pid, message) })
+			.on(Message.ACKNOWLEDGE, message => { this._propose(message.pid, message) })
+			.on(Message.PROPOSE, message => { this._accept(message.pid, message) })
+			.on(Message.ACCEPT, message => { this._decide(message.pid, message) })
+			.on(Message.DECIDE, message => { this._decided(message.pid, message) });
 	}
 
 	start(resolver = null) {
+		console.group('start');
 		console.log('starting paxos');
 		/** @private */
 		this._resolver = resolver;
 		console.log(this._candidate);
-		if (!this._candidate.isLeader)
-			return;
 		const leader = this._candidate.leader;
-		const myId = this._overlay.network.inViewID;
-		const message = new Message(Message.START, {
-			pid: myId,
-			cible: 'tman'
-		});
+		console.log('leader', leader);
+		if (!leader) {
+			console.groupEnd('start');
+			return;
+		}
 
+		const myId = this._overlay.network.inviewId;
+		console.log('myId', myId);
+		const message = new Message(Message.START, {
+			pid: myId
+		});
+		console.log('message', message);
+
+		console.log('leader.peer === myId ?', leader.peer === myId);
 		if (leader.peer === myId) {
+			console.groupEnd('start');
 			this._prepare(myId, message);
 		} else {
-			this._overlay.communication.sendUnicast(leader.peer, message);
+			this._overlay.network.rps.unicast.emit(message.type, leader.peer, message);
+			// this._overlay.communication.sendUnicast(leader.peer, message);
 			// this._node.overlay(this._overlayName).communication.sendUnicast(leader.peer, message);
 			/*this.foglet.sendOverlayUnicast(
 				this.overlay,
 				leader.peer,
 				message
 			);*/
+			console.groupEnd('start');
 		}
 	}
 
 	/**
-	 * @param {*} id 
-	 * @param {*} message 
+	 * @param {string} id 
+	 * @param {Message} message 
 	 * @private
 	 */
 	_prepare(id, message) {
-		if (this.periodic)
+		console.group('prepare');
+		console.log('periodic ?', this._periodic);
+		if (this._periodic) {
+			console.groupEnd('prepare');
 			return;
+		}
 		this._progression.initialValue = message.content;
-		Ballot.setPid(
-			this._progression.ballot,
-			this._overlay.network.inViewID
-		);
+		this._progression.ballot.pid = this._overlay.network.inViewId;
+		console.groupEnd('prepare');
 		this._sendPrepare();
-		this.periodic = setInterval(() => {
+		/** @private */
+		this._periodic = setInterval(() => {
 			this._sendPrepare();
 		}, DELTA);
 	}
 
-	/** @private */
+	/**
+	 * @param {string} id 
+	 * @param {Message} message 
+	 * @private
+	 */
 	_sendPrepare() {
-		if (!this._candidate.isLeader())
+		console.group('sendPrepare');
+		console.log('candidate.isLeader ?', this._candidate.isLeader());
+		if (!this._candidate.isLeader()) {
+			console.groupEnd('sendPrepare');
 			return;
+		}
 		this._progression.proposed = [];
-		this._progression.maxPeers = this._overlayName.network.getNeighbours();
+		this._progression.maxPeers = this._overlay.network.getNeighbours().length + 1;
 		// this.foglet.neighboursOverlay(this.overlay).length + 1;
 
-		const ballot = Ballot.increment(this._progression.ballot);
+		this._progression.ballot.n++;
 		const message = new Message(Message.PREPARE, {
-			ballot,
+			pid: this._overlay.network.inviewId,
+			ballot: this._progression.ballot,
 			maxPeers: this._progression.maxPeers
 		});
 		for (let peer of this._overlay.network.getNeighbours())
-			this._overlay.communication.sendUnicast(peer, message);
+			this._overlay.network.rps.unicast.emit(message.type, peer, message);
+		// this._overlay.communication.sendUnicast(peer, message);
 		// this.foglet.sendOverlayUnicastAll(this.overlay, message);
-		this._acknowledge(this._overlay.network.inViewID, message);
+		console.groupEnd('sendPrepare');
+		this._acknowledge(this._overlay.network.inViewId, message);
 	}
 
 	/**
-	 * @param {*} id 
-	 * @param {*} message 
+	 * @param {string} id 
+	 * @param {Message} message 
 	 * @private
 	 */
 	_acknowledge(id, message) {
-		// console.log(id, message)
-		if (this._progression.decided) return;
-		let { ballot, maxPeers } = message.content;
+		console.group('acknowledge');
+		console.log('decided ?', this._progression.decided);
+		if (this._progression.decided) {
+			console.groupEnd('acknowledge');
+			return;
+		}
+		const ballot = new Ballot(message.content.ballot.pid, message.content.ballot.n)
+		let { maxPeers } = message.content;
 		this._progression.maxPeers = maxPeers;
+		console.log('greaterThan ?', Ballot.greaterThan(ballot, this._progression.ballot));
 		if (Ballot.greaterThan(ballot, this._progression.ballot)) {
 			this._progression.ballot = ballot;
 
 			const answer = new Message(Message.ACKNOWLEDGE, {
+				pid: this._overlay.network.inviewId,
 				ballot,
 				acceptedBallot: this._progression.acceptedBallot,
 				acceptedValue: this._progression.acceptedValue
 			});
 
-			if (id === this._overlay.network.inViewID) {
-				this._propose(this._overlay.network.inViewID, answer);
+			console.log('id === inViewId ?', id === this._overlay.network.inViewId);
+			if (id === this._overlay.network.inViewId) {
+				console.groupEnd('acknowledge');
+				this._propose(this._overlay.network.inViewId, answer);
 			} else {
-				this._overlay.communication.sendUnicast(ballot.pid, answer);
+				// this._overlay.communication.sendUnicast(ballot.pid, answer);
+				this._overlay.network.rps.unicast.emit(answer.type, ballot.pid, answer);
 				/*this.foglet.sendOverlayUnicast(
 					this.overlay,
 					ballot.pid,
 					answer
 				);*/
+				console.groupEnd('acknowledge');
 			}
+		} else {
+			console.groupEnd('acknowledge');
 		}
 	}
 
 	/**
-	 * @param {*} id 
-	 * @param {*} message 
+	 * @param {string} id 
+	 * @param {Message} message 
 	 * @private
 	 */
 	_propose(id, message) {
+		console.group('propose');
 		// console.log(id, message)
-		if (this._progression.decided) return;
-		const { ballot, acceptedBallot, acceptedValue } = message.content;
-		if (!acceptedBallot) return;
+		console.log('decided ?', this._progression.decided);
+		if (this._progression.decided) {
+			console.groupEnd('propose');
+			return;
+		}
+		const ballot = new Ballot(message.content.ballot.pid, message.content.ballot.n);
+		const acceptedBallot = new Ballot(message.content.acceptedBallot.pid, message.content.acceptedBallot.n);
+		const { acceptedValue } = message.content;
+		console.log('acceptedBallot ?', acceptedBallot);
+		if (!acceptedBallot) {
+			console.groupEnd('propose');
+			return;
+		}
 
 		this._progression.proposed.push({
 			ballot: acceptedBallot,
 			value: acceptedValue
 		});
 
+		console.log('majority ?', this._majority(this._progression.proposed));
 		if (this._majority(this._progression.proposed)) {
-			let value = null;
-			if (this._isNoValue()) {
-				value = this._progression.initialValue;
-			} else {
-				value = this._greatestBallot().value;
-			}
-			const message = new Message(Message.PROPOSE, {
-				ballot: ballot,
+			const value = this._isNoValue() ? this._progression.initialValue : this._greatestBallot().value;
+			console.log('value', value);
+			const answer = new Message(Message.PROPOSE, {
+				pid: this._overlay.network.inviewId,
+				ballot,
 				value
 			});
 			// this.foglet.sendOverlayUnicastAll(this.overlay, message);
 			for (let peer of this._overlay.network.getNeighbours())
-				this._overlay.communication.sendUnicast(peer, message);
-			this._accept(this._overlay.network.inViewID, message);
+				// this._overlay.communication.sendUnicast(peer, message);
+				this._overlay.network.rps.unicast.emit(answer.type, peer, answer);
+			console.groupEnd('propose');
+			this._accept(this._overlay.network.inViewId, answer);
+		} else {
+			console.groupEnd('propose');
 		}
 	}
 
 	/**
-	 * 
-	 * @param {*} id 
-	 * @param {*} message 
+	 * @param {string} id 
+	 * @param {Message} message 
 	 * @private
 	 */
 	_accept(id, message) {
-		if (this._progression.decided) return;
+		console.group('accept');
+		console.log('decided', this._progression.decided);
+		if (this._progression.decided) {
+			console.groupEnd('accept');
+			return;
+		}
 
-		const { ballot, value } = message.content;
+		const ballot = new Ballot(message.content.ballot.pid, message.content.ballot.n);
+		const { value } = message.content;
 		if (Ballot.greaterThan(ballot, this._progression.ballot)) {
 			this._progression.acceptedBallot = ballot;
 			this._progression.acceptedValue = value;
-			const message = new Message(Message.ACCEPT, {
+			const answer = new Message(Message.ACCEPT, {
+				pid: this._overlay.network.inviewId,
 				ballot: this._progression.acceptedBallot,
 				value: this._progression.acceptedValue
 			});
 			// this.foglet.sendOverlayUnicastAll(this.overlay, message);
 			for (let peer of this._overlay.network.getNeighbours())
-				this._overlay.communication.sendUnicast(peer, message);
-			this._decide(this._overlay.network.inViewID, message);
+				// this._overlay.communication.sendUnicast(peer, message);
+				this._overlay.network.rps.unicast.emit(answer.type, peer, answer);
+			console.groupEnd('accept');
+			this._decide(this._overlay.network.inViewId, answer);
+		} else {
+			console.groupEnd('accept');
 		}
 	}
 
 	/**
-	 * @param {*} id 
-	 * @param {*} message 
+	 * @param {string} id 
+	 * @param {Message} message 
 	 * @private
 	 */
 	_decide(id, message) {
-		if (this._progression.decided)
+		console.group('decide');
+		console.log('progression', this._progression);
+		if (this._progression.decided) {
+			console.groupEnd('decide');
 			return;
-		const { ballot, value } = message.content;
-		const bstring = Ballot.toString(ballot);
+		}
+		const ballot = new Ballot(message.content.ballot.pid, message.content.ballot.n);
+		const { value } = message.content;
+		const bstring = `${ballot.pid}-${ballot.n}`;
 
 		if (!this._progression.accepted[bstring])
 			this._progression.accepted[bstring] = { [id]: value };
 		else
 			this._progression.accepted[bstring][id] = value;
 
-		if (!this._isMajorityValue(bstring, value))
+		if (!this._isMajorityValue(bstring, value)) {
+			console.groupEnd('decide');
 			return;
+		}
 
 		// this.progression.decided = value;
 		// Normalement setInterval, mais pour tester je fais qu'une seule fois
-		const answer = new Message(Message.DECIDE, { value });
+		const answer = new Message(Message.DECIDE, {
+			pid: this._overlay.network.inviewId,
+			value
+		});
 		// this.foglet.sendOverlayUnicastAll(this.overlay, answer);
 		for (let peer of this._overlay.network.getNeighbours())
-			this._overlay.communication.sendUnicast(peer, answer);
-		this._decided(this._overlay.network.inViewID, answer);
+			// this._overlay.communication.sendUnicast(peer, answer);
+			this._overlay.network.rps.unicast.emit(answer.type, peer, answer);
+		console.groupEnd('decide');
+		this._decided(this._overlay.network.inViewId, answer);
 	}
 
 	/**
-	 * @param {*} id 
-	 * @param {*} message 
+	 * @param {string} id 
+	 * @param {Message} message 
 	 * @private
 	 */
 	_decided(id, message) {
+		console.group('decided');
 		console.log('decided');
-		if (this._progression.decided)
+		if (this._progression.decided) {
+			console.groupEnd('decided');
 			return;
+		}
 		const { value } = message.content;
 		this._progression.decided = value;
 		if (this._resolver)
 			this._resolver(value);
 
-		if (!this._candidate.isLeader())
+		if (!this._candidate.isLeader()) {
+			console.groupEnd('decided');
 			return;
-		clearInterval(this.periodic);
+		}
+		clearInterval(this._periodic);
+		console.groupEnd('decided');
 	}
 
 	/**
@@ -326,6 +345,7 @@ export default class Paxos {
 	_greatestBallot() {
 		if (this._progression.length == 0)
 			return;
+		console.log('greatestBallot', this._progression.proposed);
 		let greatest = this._progression.proposed[0];
 		for (let proposed of this._progression.proposed)
 			if (Ballot.greaterThan(proposed.ballot, greatest.ballot) && proposed.value !== null)
@@ -343,22 +363,26 @@ export default class Paxos {
 	 * @returns {boolean}
 	 */
 	_majority(array) {
+		console.log('majority ?', array.length, '/', this._progression.maxPeers);
 		return array.length >= Math.floor(this._progression.maxPeers / 2 + 1);
 	}
 
 	/**
 	 * @private
 	 * @param {string} bstring 
-	 * @param {*} value 
 	 * @returns {boolean}
 	 */
 	_isMajorityValue(bstring, value) {
 		let count = 0;
 		const accepted = this._progression.accepted[bstring];
-		Object.keys(accepted).forEach(key => {
-			if (value && accepted[key].pid == value.pid)
+		for(let key of Object.keys(accepted)) {
+			if (value && accepted[key].pid === value.pid)
 				count++;
-		});
+		}
+		/*Object.keys(accepted).forEach(key => {
+			if (value && accepted[key].pid === value.pid)
+				count++;
+		});*/
 
 		return count >= Math.floor(this._progression.maxPeers / 2 + 1);
 	}
