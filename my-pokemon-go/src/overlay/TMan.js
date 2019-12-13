@@ -1,14 +1,21 @@
 // import uuid from 'uuid/v4';
 
-import { Foglet } from 'foglet-core';
+// import { Foglet } from 'foglet-core';
 import NetworkManager from 'foglet-core/src/network/network-manager';
 
 import TManOverlay from './TManOverlay';
-import Message from '../consensus/Message';
+// import Message from '../consensus/Message';
 import Pokemon from '../Pokemon';
 import euclidianDistance from '../euclidianDistance';
-import Paxos from '../consensus/Paxos';
+// import Paxos from '../consensus/Paxos';
 import Consensus from '../consensus/Consensus';
+
+class LoggableMap extends Map {
+	set(key, value) {
+		console.log(value);
+		super.set(key, value);
+	}
+}
 
 export default class TMan extends TManOverlay {
 	/**
@@ -18,36 +25,48 @@ export default class TMan extends TManOverlay {
 	constructor(networkManager, options) {
 		super(networkManager, options);
 
-		console.log('this', this);
+		console.log('tman', this);
 
-		this.visiblePokemons = new Map();
+		/** @type {Map.<string, Pokemon>} */
+		this.visiblePokemons = new LoggableMap();
+
 		// networkManager.overlay('tman').network.rps.join().then(console.info);
 		// console.log('rps', this._rps);
-		this.rps.unicast.on('pokemon-spawned', ({ peerId, pokemon }) => {
-			// this.emit('pokemon-spawned', pokemon);
-			console.log('pokemon', pokemon, ' spawned (', peerId, ')');
-			this.visiblePokemons.set(pokemon.id, new Consensus(options.node, 'tman', pokemon, leader => {
+		/*this.communication.onUnicast((id, message) => {
+			if(message.type === 'pokemon-spawned') {
+				console.log(id + ' said that a pokemon has spawned');
+				this.visiblePokemons.set(pokemon.id, new Consensus(this.node.overlay('tman'), pokemon, leader => {
+					console.log('elected leader:', leader);
+				}));
+			}
+		});*/
+		this.rps.unicast.on('pokemon-spawned', message => {
+			console.log(message.peerId + ' said that a pokemon has spawned');
+			this.visiblePokemons.set(message.pokemon.id, new Consensus(this._manager.overlay(options.pid), message.pokemon, leader => {
 				console.log('elected leader:', leader);
 			}));
 		});
+		/*this.rps.unicast.on('pokemon-spawned', ({ peerId, pokemon }) => {
+			// this.emit('pokemon-spawned', pokemon);
+			console.log('pokemon', pokemon, ' spawned (', peerId, ')');
+			this.visiblePokemons.set(pokemon.id, new Consensus(this.node.overlay('tman'), pokemon, leader => {
+				console.log('elected leader:', leader);
+			}));
+		});*/
 		this.rps.unicast.on('pokemon-catched', ({ peerId, pokemon }) => {
 			// this.emit('pokemon-catched', pokemon);
 			console.log('Pokemon', pokemon.id, 'catched by', peerId);
 		});
 
-		this.rps.unicast.on('update-descriptor', ({ peerId, descriptor }) => {
-			this._rps.cache.set(peerId, descriptor);
-			// console.log('received updated descriptor from', peerId, descriptor);
-		});
 
-		this.rps.unicast
+
+		/*this.rps.unicast
 			.on(Message.START, message => { this.emit(Message.START, message) })
 			.on(Message.PREPARE, message => { this.emit(Message.PREPARE, message) })
 			.on(Message.ACKNOWLEDGE, message => { this.emit(Message.ACKNOWLEDGE, message) })
 			.on(Message.PROPOSE, message => { this.emit(Message.PROPOSE, message) })
 			.on(Message.ACCEPT, message => { this.emit(Message.ACCEPT, message) })
-			.on(Message.DECIDE, message => { this.emit(Message.DECIDE, message) });
-
+			.on(Message.DECIDE, message => { this.emit(Message.DECIDE, message) });*/
 
 
 		// console.log('?', this._manager);
@@ -59,10 +78,36 @@ export default class TMan extends TManOverlay {
 		// console.log('partialView', this._rps.partialView);
 		// console.log('network', this._rps._network);
 
+		this.rps.unicast.on('update-descriptor', ({ peerId, descriptor }) => {
+			this.rps.cache.set(peerId, descriptor);
+			// console.log('received updated descriptor from', peerId, descriptor);
+		});
+
+		setInterval(() => {
+			console.log(" *** PEERS ***");
+			let nbOfPeers = 0
+			for (let [peerId, {descriptor}] of this.rps.partialView) {
+				console.log(peerId);
+				const x1 = this.descriptor.x;
+				const y1 = this.descriptor.y;
+				const x2 = descriptor.x;
+				const y2 = descriptor.x;
+				if (Math.hypot(Math.abs(x1 - x2), Math.abs(y1 - y2)) < 10)
+					nbOfPeers++;
+			}
+			let p = 0.1*(nbOfPeers+1);
+			let r = Math.random();
+			console.log(r);
+			console.log(p);
+			if (r < p)
+				this.spawnPokemon(new Pokemon("Evoli", 0, 0));
+			console.log(" *** peers ***");
+		}, 10 * 1000);
+
 		setInterval(() => {
 			for (let [peerId] of this.rps.partialView) {
 				this.rps.unicast.emit('update-descriptor', peerId, {
-					peerId: this.rps.parent.options.peer,
+					peerId: this.inviewId,
 					descriptor: this.rps.options.descriptor
 				});
 				// console.log(`send updated descriptor to ${peerId}`);
@@ -71,24 +116,37 @@ export default class TMan extends TManOverlay {
 	}
 
 	/**
-	 * @param {Foglet} node 
 	 * @param {Pokemon} pokemon 
 	 */
-	spawnPokemon(node, pokemon) {
-		this.visiblePokemons.set(pokemon.id, new Consensus(node, 'tman', pokemon, leader => {
+	spawnPokemon(pokemon) {
+		this.visiblePokemons.set(pokemon.id, new Consensus(this._manager.overlay(this.options.pid), pokemon, leader => {
+			console.log('elected leader is', leader);
+		}));
+		for (let [peerId, { descriptor }] of this.rps.partialView) {
+			if (euclidianDistance(this.rps.options.descriptor, descriptor) <= this.options.range) {
+				console.log('emit', 'pokemon-spawned', peerId, this.inviewId, pokemon);
+				this.rps.unicast.emit('pokemon-spawned', peerId, {
+					peerId: this.inviewId,
+					pokemon
+				});
+			}
+		}
+
+
+		/*this.visiblePokemons.set(pokemon.id, new Consensus(node, 'tman', pokemon, leader => {
 			console.log('elected leader is', leader);
 		}));
 		for (let [peerId, {descriptor}] of this.rps.partialView) {
-			if(euclidianDistance(this._rps.options.descriptor, descriptor) <= this.options.range) {
+			if(euclidianDistance(this.rps.options.descriptor, descriptor) <= this.options.range) {
 				this.rps.unicast.emit('pokemon-spawned', peerId, {
 					peerId: this.rps.inViewID,
 					pokemon
 				});
 			}
-		}
+		}*/
 	}
 
-
+	/** @private */
 	_startDescriptor() {
 		return {
 			x: 0,
@@ -96,26 +154,29 @@ export default class TMan extends TManOverlay {
 		}
 	}
 
+	/** @private */
 	_descriptorTimeout() {
 		return 10 * 1000;
 	}
 
 	/**
-	 * 
-	 * @param {*} neighbour 
+	 * @private
+	 * @param {{x: number, y: number}} neighbour 
 	 * @param {{x: number, y: number}} descriptorA 
 	 * @param {{x: number, y: number}} descriptorB 
+	 * @returns {number}
 	 */
 	_rankPeers(neighbour, descriptorA, descriptorB) {
 		const distanceA = euclidianDistance(neighbour.descriptor, descriptorA);
 		const distanceB = euclidianDistance(neighbour.descriptor, descriptorB);
 
 		if (distanceA === distanceB) {
-			if (descriptorA.x >= descriptorB.x) {
+			return descriptorA.x >= descriptorB.x ? -1 : 1;
+			/*if (descriptorA.x >= descriptorB.x) {
 				return -1;
 			} else if (descriptorA.x < descriptorB.x) {
 				return 1;
-			}
+			}*/
 		}
 		return distanceA - distanceB;
 	}

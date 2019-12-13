@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import fogletCore from 'foglet-core';
-import Network from 'foglet-core/src/network/network';
+// import Network from 'foglet-core/src/network/network';
 // import tmanwrtc from 'tman-wrtc';
 // import TManOverlay from '../overlay/TMan';
 import euclidianDistance from '../euclidianDistance';
@@ -11,7 +11,7 @@ import euclidianDistance from '../euclidianDistance';
 // const tmanwrtc = require('tman-wrtc');
 // const TManOverlay = require('../overlay/TMan.js');
 
-const Foglet = fogletCore.Foglet;
+// const Foglet = fogletCore.Foglet;
 const AbstractNetwork = fogletCore.abstract.rps;
 
 export default class Leader {
@@ -25,17 +25,27 @@ export default class Leader {
 		this.leader = null;
 
 		/** @private */
-		const ranking = neighbour => (a, b) => {
+		this._overlay = overlay;
+		/** @private */
+		this._pokemon = pokemon;
+		/** @private */
+		this._callback = callback;
+
+		/** @private */
+		this._ranking = neighbour => (a, b) => {
 			const distanceA = euclidianDistance(neighbour, a);
 			const distanceB = euclidianDistance(neighbour, b);
-
 			if (distanceA === distanceB)
-				return a.id >= b.id ? 1 : -1;
+				return a.peer >= b.peer ? 1 : -1;
 			else
 				return distanceA - distanceB;
 		};
-		
-		const rps = overlay.network.rps;
+
+		this.doLeaderElection();
+	}
+
+	doLeaderElection() {
+		const rps = this._overlay.network.rps;
 		/** @type {Map.<string, {peer: string, descriptor: {x: number, y: number}}>} */
 		const partialView = rps.partialView;
 		/** @type {{peer: string, x: number, y: number}[]} */
@@ -47,16 +57,17 @@ export default class Leader {
 		});
 		descriptors.push({
 			...rps.options.descriptor,
-			peer: overlay.inViewID
+			peer: this._overlay.network.inviewId
 		});
-		console.log(descriptors);
-		descriptors.sort(ranking(pokemon));
+		console.log('leaders', descriptors);
+		descriptors.sort(this._ranking(this._pokemon.position));
 		this.leader = descriptors[0];
-		callback(this.leader);
+		console.log('leader', this.leader);
+		this._callback(this.leader);
 	}
 
 	/** @returns {boolean} */
-	get isLeader() {
-		return this.leader ? this.leader.peer == this.foglet.inViewID : false;
+	isLeader() {
+		return this.leader && this.leader.peer === this._overlay.network.inviewId;
 	}
 }

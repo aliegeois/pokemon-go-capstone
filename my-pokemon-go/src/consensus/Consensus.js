@@ -1,17 +1,19 @@
-import { Foglet } from 'foglet-core';
+// import { Foglet } from 'foglet-core';
 import Paxos from './Paxos';
 import Pokemon from '../Pokemon';
 
 export default class Consensus {
 	/**
-	 * @param {Foglet} node 
-	 * @param {string} overlayName 
+	 * @param {Network} overlay 
 	 * @param {Pokemon} pokemon 
 	 * @param {function(string, {x: number, y: number, peer: string}): void} onLeader 
 	 */
-	constructor(node, overlayName, pokemon, onLeader) {
+	constructor(overlay, pokemon, onLeader) {
+		console.log('consensus', this);
+		/** @private */
 		this._pokemon = pokemon;
-		this.paxos = new Paxos(node, overlayName, pokemon, onLeader);
+		/** @private */
+		this._paxos = new Paxos(overlay, pokemon, onLeader);
 	}
 
 	get pokemon() {
@@ -22,6 +24,6 @@ export default class Consensus {
 	 * @return {Promise}
 	 */
 	catch() {
-		return new Promise(resolve => this.paxos.start(resolve));
+		return new Promise(resolve => this._paxos.start(resolve));
 	}
 }
