@@ -10,40 +10,37 @@
 			table, td {
 				border: 1px solid black;
 			}
+			html, body, #map {
+				height: 100%;
+				margin: 0;
+				overflow: hidden;
+			}
 		</style>
+
+		<script src="https://maps.google.com/maps/api/js?key=AIzaSyC2OVSaJqH1Op3YUDFwm8LlPDJDywnpsqA"></script>
+
 		<title>My Pokemon Go</title>
 	</head>
 	<body>
-		<div class="info">
-			<strong>Infos</strong><br />
-			Position: (x: <span class="pos-x">0</span>, y: <span class="pos-y">0</span>)<br />
-			Id: <span class="id"></span>
+		<div style="position:absolute; z-index: 2">
+			<div class="info">
+				<strong>Infos</strong><br />
+				Position: (x: <span class="pos-x">0</span>, y: <span class="pos-y">0</span>)<br />
+				Id: <span class="id"></span>
+			</div>
+	
+			<div class="info">
+				<strong>Change position</strong><br />
+				x: <input type="number" id="input-pos-x" /> y: <input type="number" id="input-pos-y" /> <button id="update-position">Update</button>
+			</div>
+			<div class="info">
+				<strong>Spawn pokemon</strong><br />
+				name: <input id="input-pokemon-name" type="text" /> x: <input id="input-pokemon-x" type="number" step="any" /> y: <input id="input-pokemon-y" type="number" step="any" /> <button id="spawn-pokemon">Spawn</button>
+			</div>
+	
+			<table id="neighbours"></table>
 		</div>
 
-		<div class="info">
-			<strong>Change position</strong><br />
-			x: <input type="number" id="input-pos-x" /> y: <input type="number" id="input-pos-y" /> <button id="update-position">Update</button>
-		</div>
-		<div class="info">
-			<strong>Spawn pokemon</strong><br />
-			name: <input id="input-pokemon-name" type="text" /> x: <input id="input-pokemon-x" type="number" /> y: <input id="input-pokemon-y" type="number" /> <button id="spawn-pokemon">Spawn</button>
-		</div>
-
-		<table id="neighbours"></table>
-
-		<table id="visible-pokemons"></table>
-		<div id="map" style="height: 450px;width: 1400px"></div>
-		<script>
-			var map;
-			function initMap() {
-				map = new google.maps.Map(document.getElementById('map'), {
-					center: {lat: 47.21482, lng: -1.55525},
-					zoom: 20
-				});
-			}
-		</script>
-		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2OVSaJqH1Op3YUDFwm8LlPDJDywnpsqA&callback=initMap"
-				async defer></script>
-
+		<div id="map" style="z-index: 1"></div>
 	</body>
 </html>

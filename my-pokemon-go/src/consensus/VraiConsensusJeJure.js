@@ -17,9 +17,9 @@ export default class Consensus {
 	}
 
 	/**
-	 * @return {Promise}
+	 * @return {Promise<string>}
 	 */
 	catch() {
-		return Promise.resolve(this._overlay.network.rps.getInviewId())
+		return Promise.resolve(this._overlay.network.rps.getInviewId());
 	}
 }

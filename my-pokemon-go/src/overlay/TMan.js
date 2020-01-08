@@ -1,13 +1,8 @@
-// import uuid from 'uuid/v4';
-
-// import { Foglet } from 'foglet-core';
 import NetworkManager from 'foglet-core/src/network/network-manager';
 
 import TManOverlay from './TManOverlay';
-// import Message from '../consensus/Message';
 import Pokemon from '../Pokemon';
-import euclidianDistance from '../euclidianDistance';
-// import Paxos from '../consensus/Paxos';
+import distance from '../euclidianDistance';
 import Consensus from '../consensus/Consensus';
 
 class LoggableMap extends Map {
@@ -19,7 +14,6 @@ class LoggableMap extends Map {
 
 export default class TMan extends TManOverlay {
 	/**
-	 * 
 	 * @param {NetworkManager} networkManager
 	 */
 	constructor(networkManager, options) {
@@ -83,9 +77,9 @@ export default class TMan extends TManOverlay {
 			// console.log('received updated descriptor from', peerId, descriptor);
 		});
 
-		setInterval(() => {
+		/*setInterval(() => {
 			let nbPeers = 0;
-			for (let [peerId, {descriptor}] of this.rps.partialView) {
+			for (let [peerId, { descriptor }] of this.rps.partialView) {
 				console.log(peerId);
 				const x1 = this.descriptor.x;
 				const y1 = this.descriptor.y;
@@ -96,11 +90,11 @@ export default class TMan extends TManOverlay {
 			}
 			let p = 1 / (nbPeers + 1);
 			let r = Math.random();
-			if (r < p) {
+			if (r < p) {
 				console.log('un evoli est apparu')
 				this.spawnPokemon(new Pokemon('Evoli', 0, 0));
 			}
-		}, 10 * 1000);
+		}, 10 * 1000);*/
 
 		setInterval(() => {
 			for (let [peerId] of this.rps.partialView) {
@@ -121,7 +115,7 @@ export default class TMan extends TManOverlay {
 			console.log('elected leader is', leader);
 		}));
 		for (let [peerId, { descriptor }] of this.rps.partialView) {
-			if (euclidianDistance(this.rps.options.descriptor, descriptor) <= this.options.range) {
+			if (distance(this.rps.options.descriptor, descriptor) <= this.options.range) {
 				console.log('emit', 'pokemon-spawned', peerId, this.inviewId, pokemon);
 				this.rps.unicast.emit('pokemon-spawned', peerId, {
 					peerId: this.inviewId,
@@ -165,8 +159,8 @@ export default class TMan extends TManOverlay {
 	 * @returns {number}
 	 */
 	_rankPeers(neighbour, descriptorA, descriptorB) {
-		const distanceA = euclidianDistance(neighbour.descriptor, descriptorA);
-		const distanceB = euclidianDistance(neighbour.descriptor, descriptorB);
+		const distanceA = distance(neighbour.descriptor, descriptorA);
+		const distanceB = distance(neighbour.descriptor, descriptorB);
 
 		if (distanceA === distanceB) {
 			return descriptorA.x >= descriptorB.x ? -1 : 1;

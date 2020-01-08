@@ -402,7 +402,7 @@ let refresh = () => {
 				map
 			});
 
-			var contentString = '<div id="content">' +
+			/*var contentString = '<div id="content">' +
 				'<div id="siteNotice">' +
 				'</div>' +
 				'<h1 id="firstHeading" class="firstHeading">Billy</h1>' +
@@ -415,9 +415,10 @@ let refresh = () => {
 			var infowindow = new google.maps.InfoWindow({
 				content: contentString
 			});
+
 			markers[id].addListener('click', function () {
 				infowindow.open(map, markers[id]);
-			});
+			});*/
 		}
 	}
 	n.appendChild(tr2);
