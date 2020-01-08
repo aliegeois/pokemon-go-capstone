@@ -31,7 +31,8 @@
 		"lodash.merge": "^4.6.2",
 		"node-fetch": "^2.6.0",
 		"tman-wrtc": "^1.0.0",
-		"uuid": "^3.3.3"
+		"uuid": "^3.3.3",
+		"webpack-dev-server": "*"
 	},
 	"scripts": {
 		"start": "webpack-dev-server --mode development --open --hot",
