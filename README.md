@@ -71,10 +71,11 @@ Pour ne capturer un Pokémon qu'une seule fois, l'utilisation d'un consensus est
 
 # Démarrer le projet
 
-Clonez ou téléchargez le projet. Ouvrez le terminal et entrez les commandes suivantes :
+Clonez ou téléchargez le projet. Ouvrez le terminal et entrez la commande suivante pour installer les différents packages :
 ```
 npm i
 ```
+Entrez ensuite la commande suivante pour démarrer le projet :
 ```
 npm start
 ```
