@@ -60,7 +60,7 @@ Celui-ci a besoin d'un ensemble de processus qui réalisent le consensus, c'est 
 Chaque solution que nous avons choisie apporte son lot d'avantages et d'inconvénient, nous en discutons ici.
 
 ## Cyclon
-Pour avoir un réseau robuste et dynamique entre les utilisateurs, on a utilisé Cyclon. Cyclon est un système P2P où on suppose que les noeuds conservent une petite vue partielle de l'ensemble du réseau. Il a une bonne gestion des ajouts et suppressions des noeuds, ce qui nous permet d'établir une gestion des membres peu coûteuses en terme de ressources , qui ne perturbe pas le caracrtère aléatoire du réseau overlay.
+Pour avoir un réseau robuste et dynamique entre les utilisateurs, on a utilisé Cyclon, un système P2P où on suppose que les noeuds conservent une petite vue partielle de l'ensemble du réseau. Il a une bonne gestion des ajouts et suppressions des noeuds, ce qui nous permet d'établir une gestion des membres peu coûteuses en terme de resources, qui ne perturbe pas le caractère aléatoire du réseau overlay.
 
 ## TMAN
 
