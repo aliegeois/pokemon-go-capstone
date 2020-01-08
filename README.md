@@ -11,7 +11,7 @@ Fonctionnalités qui ne nous intéressent pas:
 - Plusieurs personnes peuvent capturer le même pokémon
 - Application centralisée
 
-Ainsi nous voulons recréer le jeu dans un système distribué en rajoutant une contrainte qui permet à un pokémon de n'être capturé que par une seule personne au maximum
+Ainsi nous voulons recréer le jeu dans un système distribué en rajoutant une contrainte qui permet à un pokémon de n'être capturé que par une seule personne au maximum.
 
 Pour ce faire nous avons plusieurs problèmes à résoudre:
 - Créer un réseau distribué que les utilisateurs peuvent rejoindre et quitter à n'importe quel moment
@@ -55,12 +55,45 @@ Pour chaque capture de pokémon, il faut réaliser un consensus entre les utilis
 
 Celui-ci a besoin d'un ensemble de processus qui réalisent le consensus, c'est pourquoi nous avons besoin, lors de chaque capture, de récupérer tous les utilisateurs qui peuvent voir le pokémon et de les recruter pour le consensus.
 
-# Conséquences de solutions décidées
+# Conséquences des solutions adoptées
 
 Chaque solution que nous avons choisie apporte son lot d'avantages et d'inconvénient, nous en discutons ici.
 
 ## Cyclon
+Pour avoir un réseau robuste et dynamique entre les utilisateurs, on a utilisé Cyclon, un système P2P où on suppose que les noeuds conservent une petite vue partielle de l'ensemble du réseau. Il a une bonne gestion des ajouts et suppressions des noeuds, ce qui nous permet d'établir une gestion des membres peu coûteuses en terme de resources, qui ne perturbe pas le caractère aléatoire du réseau overlay.
 
 ## TMAN
 
-Dans le but de trouver les utilisateurs proches de soi, nous avons utilisé la librairie TMAN. TMAN permet
+Dans le but de trouver les utilisateurs proches de soi, nous avons utilisé la librairie TMAN. TMAN permet d'obtenir une topologie à partir d'un graphe. Une topologie est une forme prédéfine de réseau (ring, torus, ligne)... Pour chaque topologie, on définit une ranking function qui est elle même définie par une distance function. une distance function peut être une distance entre deux points, de Manhattan, ou encore géodésique (notre cas).
+Le protocole de TMAN est le suivant : Chaque noeud exécute un protocole dans lequel ils échangent leurs vues
+avec leur plus proche voisin en fonction de la fonction de ranking. Ce protocole est exécuté périodiquement, comme
+ça dans chaque cycle, tous les noeuds améliorent leur vue et la topolgie de départ devient de plus en plus
+proche de la topologie visée. La solution est basée sur deux threads, un actif et un passif. Le thread actif
+initialise la communication avec les autres noeuds et le passif attend les messages entrants. Quand ils échangent
+leurs vues, les noeuds ajoutent aussi un échantillon aléatoire des noeuds du réseau en entier. Cet échantillon
+aléatoire est important quand un noeud a un mauvais set de voisins dans les grandes topologies. Cela permet de
+réduire le nombre d'échanges nécessaires pour avoir le bon set de voisins.
+
+## Paxos
+
+Pour ne capturer un Pokémon qu'une seule fois, l'utilisation d'un consensus est obligatoire. Pour ceci, nous passons par Paxos, et plus particulièrement Single-Decree Paxos.
+Nous avons implémenté les différentes composantes du protocole Paxos dans notre application. Chaque utilisateur et Pokémon possède un identifiant unique. A chaque apparition d'un Pokémon, un objet "Consensus" est créé et un leader est élu. Chaque utilisateur qui voit le Pokémon est un accepteur. De ce fait, lorsqu'un utilisateur souhaite capturer un Pokémon, il propose la valeur de son identifiant au leader pour demander la capture du Pokémon. Le leader soumet cette valeur à tous les accepteurs et, si plus de la moitié des accepteurs acceptent la valeur, alors cet utilisateur a capturé le Pokémon. De cette façon, un Pokémon peut être capturé que par un seul utilisateur. En effet, si un utilisateur souhaite capturer un Pokémon qui a déjà été capturé, les accepteurs refuseront la demande.
+
+# Possibilités d'amélioration
+
+Contre toute attente, ce projet n'est pas parfait et pourrait être amélioré. Nous faisons face à plusieurs problèmes, certains d'entre eux résolvables facilement, et d'autres quasiment impossibles à régler.
+
+Le problème le plus flagrant est la disparition des pokémons quand plus personne n'est présent autour. En effet sans serveur central, les informations sont stockées chez les clients, et si tous les clients qui possèdent une information particulière se déconnectent, cette information disparait. Il n'y a pas de solution à ce problème.
+
+Une fonctionnalité qu'il serait intéressant d'emplémenter est un chat entre les joueurs. Faire ceci entre 2 joueurs proches est facile, il suffit de regarder les voisins dans l'overlay tman, mais si 2 joueurs n'ont pas de connexion directe entre eux, la tâche se complique. Une solution possible serait d'implémenter une dht sur le réseau cyclon, permettant de connaître rapidement l'adresse de chaque joueur. Malheureusement, dans une application faite pour supporter possiblement des millions de joueurs, cela demanderait à chaque utilisateur de stocker énormément de données en local. 
+
+# Démarrer le projet
+
+Clonez ou téléchargez le projet. Ouvrez le terminal et entrez la commande suivante pour installer les différents packages :
+```
+npm i
+```
+Entrez ensuite la commande suivante pour démarrer le projet :
+```
+npm start
+```
