@@ -1,27 +1,46 @@
 <!DOCTYPE html>
-<html lang="en" style="height:100%;margin:0">
-  <style>
-    html,
-    body,
-    #root {
-      height: 100%;
-      margin: 0;
-    }
-    #root {
-      overflow: hidden;
-    }
-  </style>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Poppins:400,500,600,700"
-      rel="stylesheet"
-    />
-    <title>Pokemon Go</title>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<style>
+			.info {
+				margin-bottom: 15px;
+			}
+			table, td {
+				border: 1px solid black;
+			}
+			html, body, #map {
+				height: 100%;
+				margin: 0;
+				overflow: hidden;
+			}
+		</style>
+
+		<script src="https://maps.google.com/maps/api/js?key=AIzaSyC2OVSaJqH1Op3YUDFwm8LlPDJDywnpsqA"></script>
+
+		<title>My Pokemon Go</title>
+	</head>
+	<body>
+		<div style="position:absolute; z-index: 2">
+			<div class="info">
+				<strong>Infos</strong><br />
+				Position: (x: <span class="pos-x">0</span>, y: <span class="pos-y">0</span>)<br />
+				Id: <span class="id"></span>
+			</div>
+	
+			<div class="info">
+				<strong>Change position</strong><br />
+				x: <input type="number" id="input-pos-x" /> y: <input type="number" id="input-pos-y" /> <button id="update-position">Update</button>
+			</div>
+			<div class="info">
+				<strong>Spawn pokemon</strong><br />
+				name: <input id="input-pokemon-name" type="text" /> x: <input id="input-pokemon-x" type="number" step="any" /> y: <input id="input-pokemon-y" type="number" step="any" /> <button id="spawn-pokemon">Spawn</button>
+			</div>
+	
+			<table id="neighbours"></table>
+		</div>
+
+		<div id="map" style="z-index: 1"></div>
+	</body>
 </html>

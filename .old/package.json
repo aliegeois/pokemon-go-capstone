@@ -1,9 +1,15 @@
 {
-	"name": "my-pokemon-go",
-	"private": true,
-	"version": "0.0.1",
-	"description": "Dbar",
+	"name": "pokemongo",
+	"version": "2.0.0",
+	"description": "pokemon go",
 	"main": "index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://nachmo5@bitbucket.org/nachmo5/placement-test-fe.git"
+	},
+	"author": "Mohamed Nachit - Othmane Sabih",
+	"license": "ISC",
+	"homepage": "https://bitbucket.org/nachmo5/placement-test-fe#readme",
 	"devDependencies": {
 		"@babel/core": "^7.1.6",
 		"@babel/plugin-proposal-class-properties": "^7.1.0",
@@ -13,7 +19,6 @@
 		"babel-eslint": "^10.0.1",
 		"babel-loader": "^8.0.4",
 		"clean-webpack-plugin": "^1.0.0",
-		"css-loader": "^3.2.0",
 		"eslint": "^5.9.0",
 		"eslint-config-airbnb": "^17.1.0",
 		"eslint-loader": "^2.1.1",
@@ -21,17 +26,23 @@
 		"eslint-plugin-jsx-a11y": "^6.1.2",
 		"eslint-plugin-react": "^7.11.1",
 		"html-webpack-plugin": "^3.2.0",
-		"style-loader": "^1.0.1",
 		"webpack": "^4.25.1",
 		"webpack-cli": "^3.1.2",
 		"webpack-dev-server": "^3.1.10"
 	},
 	"dependencies": {
+		"@material-ui/core": "^3.5.1",
+		"@material-ui/icons": "^3.0.1",
+		"classnames": "^2.2.6",
 		"foglet-core": "^5.1.2",
-		"lodash.merge": "^4.6.2",
-		"node-fetch": "^2.6.0",
-		"tman-wrtc": "^1.0.0",
-		"uuid": "^3.3.3"
+		"foglet-template": "./paxos-overlays",
+		"html-react-parser": "^0.4.7",
+		"lodash": "^4.17.10",
+		"prop-types": "latest",
+		"react": "^16.4.2",
+		"react-dom": "^16.4.2",
+		"react-router": "^4.3.1",
+		"react-router-dom": "^4.3.1"
 	},
 	"scripts": {
 		"start": "webpack-dev-server --mode development --open --hot",
