@@ -63,4 +63,4 @@ Chaque solution que nous avons choisie apporte son lot d'avantages et d'inconvé
 
 ## TMAN
 
-Dans le but de trouver les utilisateurs proches de soi, nous avons utilisé la librairie TMAN. TMAN permet
+Dans le but de trouver les utilisateurs proches de soi, nous avons utilisé la librairie TMAN. TMAN permet d'obtenir toutes les topologies à partir d'un graphe. Une topologie est une forme prédéfine de réseau (ring, torus, ligne)... Pour chaque topologie, on définit une ranking function qui est elle même définie par une distance function. une distance function peut être une distance entre deux points, de Manhattan, ou encore géodésique (notre cas).
