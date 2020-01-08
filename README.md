@@ -65,6 +65,14 @@ Pour avoir un réseau robuste et dynamique entre les utilisateurs, on a utilisé
 ## TMAN
 
 Dans le but de trouver les utilisateurs proches de soi, nous avons utilisé la librairie TMAN. TMAN permet d'obtenir une topologie à partir d'un graphe. Une topologie est une forme prédéfine de réseau (ring, torus, ligne)... Pour chaque topologie, on définit une ranking function qui est elle même définie par une distance function. une distance function peut être une distance entre deux points, de Manhattan, ou encore géodésique (notre cas).
+Le protocole de TMAN est le suivant : Chaque noeud exécute un protocole dans lequel ils échangent leurs vues
+avec leur plus proche voisin en fonction de la fonction de ranking. Ce protocole est exécuté périodiquement, comme
+ça dans chaque cycle, tous les noeuds améliorent leur vue et la topolgie de départ devient de plus en plus
+proche de la topologie visée. AL solution est basée sur deux threads, un actif et un passif. Le thread actif
+initialise la communication avec les autres noeuds et le passif attend les messages entrants. Quand ils échangent
+leurs vues, les noeuds ajoutent aussi un échantillon aléatoire des noeuds du réseau en entier. Cet échantillon
+aléatoire est important quand un noeud a un mauvais set de voisins dans les grandes topologies. Cela permet de
+réduire le nombre d'échanges nécessaires pour avoir le bon set de voisins.
 
 ## Paxos
 
