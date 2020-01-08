@@ -60,3 +60,7 @@ Celui-ci a besoin d'un ensemble de processus qui réalisent le consensus, c'est 
 Chaque solution que nous avons choisie apporte son lot d'avantages et d'inconvénient, nous en discutons ici.
 
 ## Cyclon
+
+## TMAN
+
+Dans le but de trouver les utilisateurs proches de soi, nous avons utilisé la librairie TMAN. TMAN permet
