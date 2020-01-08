@@ -45,6 +45,9 @@ Dans Cyclon, et comme dans l'algorithme basique de shuffle, tous les noeuds vont
 - Le voisin séléctionné choisit aléatoirement une sous-liste de ses voisins qu'il va renvoyer pour l'échange (la taille de la sous-liste est inférieure où égale à celle de la première sous-liste).
 
 Dans Cyclon, les voisins ont un âge qu'il leur est associé, les échanges sont lancés avec le voisin le plus vieux de la liste et après l'échange. Après l'échange, dans la liste de voisins du noeud précedement choisit, l'âge du noeud ayant commencé l'échange précedent est initialisé à 0.
+Avant chaque échange, l'aĝe de tous les voisins est augmenté de 1.
+
+Pour l'insertion dans le graphe, Cyclon utilise un point d'entrée externe qui va effectuer plusieurs déplacement aléatoire dans le graphe pour obtenir plusieurs noeuds aléatoires du graphe que le noeud qui va être inseré va ajouter dans sa liste de voisins.
 
 ## Capture des pokémons
 
