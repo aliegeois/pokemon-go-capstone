@@ -1,1 +1,1 @@
-worker: npm prod
+web: npm build
