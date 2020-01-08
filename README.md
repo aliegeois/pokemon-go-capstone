@@ -11,7 +11,7 @@ Fonctionnalités qui ne nous intéressent pas:
 - Plusieurs personnes peuvent capturer le même pokémon
 - Application centralisée
 
-Ainsi nous voulons recréer le jeu dans un système distribué en rajoutant une contrainte qui permet à un pokémon de n'être capturé que par une seule personne au maximum
+Ainsi nous voulons recréer le jeu dans un système distribué en rajoutant une contrainte qui permet à un pokémon de n'être capturé que par une seule personne au maximum.
 
 Pour ce faire nous avons plusieurs problèmes à résoudre:
 - Créer un réseau distribué que les utilisateurs peuvent rejoindre et quitter à n'importe quel moment
