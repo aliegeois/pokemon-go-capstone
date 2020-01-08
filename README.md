@@ -64,3 +64,17 @@ Chaque solution que nous avons choisie apporte son lot d'avantages et d'inconvé
 ## TMAN
 
 Dans le but de trouver les utilisateurs proches de soi, nous avons utilisé la librairie TMAN. TMAN permet d'obtenir toutes les topologies à partir d'un graphe. Une topologie est une forme prédéfine de réseau (ring, torus, ligne)... Pour chaque topologie, on définit une ranking function qui est elle même définie par une distance function. une distance function peut être une distance entre deux points, de Manhattan, ou encore géodésique (notre cas).
+
+## Paxos
+
+Pour ne capturer un Pokémon qu'une seule fois, l'utilisation d'un consensus est obligatoire. Pour ceci, nous passons par Paxos, et plus particulièrement Single-Decree Paxos.
+
+# Démarrer le projet
+
+Clonez ou téléchargez le projet. Ouvrez le terminal et entrez les commandes suivantes :
+```
+npm i
+```
+```
+npm start
+```
