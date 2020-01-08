@@ -37,7 +37,7 @@ En revanche La deuxième approche est plus simple à mettre en place, un serveur
 
 C'est pourquoi nous avons choisis d'utiliser l'algorithme Cyclon pour créer un réseau dynamique et robuste aux déconnexions.
 
-Fonctionnement de Cyclon:
+Fonctionnement de Cyclon:  
 Cyclon génere un graphe améatoire en effectuant des "shuffles" entres les noeuds du graphes.
 Dans Cyclon, et comme dans l'algorithme basique de shuffle, tous les noeuds vont périodiquement:
 - Séléctionner un nombre aléatoire de voisin parmis leur liste de voisin,
