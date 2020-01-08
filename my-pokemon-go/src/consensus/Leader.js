@@ -4,7 +4,7 @@ import fogletCore from 'foglet-core';
 // import Network from 'foglet-core/src/network/network';
 // import tmanwrtc from 'tman-wrtc';
 // import TManOverlay from '../overlay/TMan';
-import euclidianDistance from '../euclidianDistance';
+import distance from '../euclidianDistance';
 
 // const fc = require('foglet-core');
 // const Network = require('foglet-core/src/network/network.js');
@@ -33,8 +33,8 @@ export default class Leader {
 
 		/** @private */
 		this._ranking = neighbour => (a, b) => {
-			const distanceA = euclidianDistance(neighbour, a);
-			const distanceB = euclidianDistance(neighbour, b);
+			const distanceA = distance(neighbour, a);
+			const distanceB = distance(neighbour, b);
 			if (distanceA === distanceB)
 				return a.peer >= b.peer ? 1 : -1;
 			else

@@ -3,11 +3,11 @@ import NetworkManager from 'foglet-core/src/network/network-manager';
 import TManOverlay from './TManOverlay';
 import Pokemon from '../Pokemon';
 import distance from '../euclidianDistance';
-import Consensus from '../consensus/Consensus';
+import Consensus from '../consensus/VraiConsensusJeJure';
 
 class LoggableMap extends Map {
 	set(key, value) {
-		console.log(value);
+		console.log(`set(${key}, ${value})`);
 		super.set(key, value);
 	}
 }
@@ -35,7 +35,7 @@ export default class TMan extends TManOverlay {
 			}
 		});*/
 		this.rps.unicast.on('pokemon-spawned', message => {
-			console.log(message.peerId + ' said that a pokemon has spawned');
+			console.log(message.peerId + ' said that a pokemon has spawned (' + message + ')');
 			this.visiblePokemons.set(message.pokemon.id, new Consensus(this._manager.overlay(options.pid), message.pokemon, leader => {
 				console.log('elected leader:', leader);
 			}));
@@ -47,9 +47,10 @@ export default class TMan extends TManOverlay {
 				console.log('elected leader:', leader);
 			}));
 		});*/
-		this.rps.unicast.on('pokemon-catched', ({ peerId, pokemon }) => {
+		this.rps.unicast.on('pokemon-catched', message => {
 			// this.emit('pokemon-catched', pokemon);
-			console.log('Pokemon', pokemon.id, 'catched by', peerId);
+			console.log('Pokemon', message.pokemon.id, 'catched by', message.peerId);
+			this.visiblePokemons.delete(message.pokemon.id);
 		});
 
 
@@ -72,17 +73,17 @@ export default class TMan extends TManOverlay {
 		// console.log('partialView', this._rps.partialView);
 		// console.log('network', this._rps._network);
 
-		this.rps.unicast.on('update-descriptor', ({ peerId, descriptor }) => {
-			this.rps.cache.set(peerId, descriptor);
+		this.rps.unicast.on('update-descriptor', message => {
+			this.rps.cache.set(message.peerId, message.descriptor);
 			// console.log('received updated descriptor from', peerId, descriptor);
 		});
 
-		/*setInterval(() => {
+		setInterval(() => {
 			let nbPeers = 0;
 			for (let [peerId, { descriptor }] of this.rps.partialView) {
 				console.log(peerId);
-				const x1 = this.descriptor.x;
-				const y1 = this.descriptor.y;
+				const x1 = descriptor.x;
+				const y1 = descriptor.y;
 				const x2 = this.rps.options.descriptor.x;
 				const y2 = this.rps.options.descriptor.y;
 				if (Math.hypot(Math.abs(x1 - x2), Math.abs(y1 - y2)) < 10)
@@ -92,9 +93,9 @@ export default class TMan extends TManOverlay {
 			let r = Math.random();
 			if (r < p) {
 				console.log('un evoli est apparu')
-				this.spawnPokemon(new Pokemon('Evoli', 0, 0));
+				this.spawnPokemon(new Pokemon('Evoli', 0, 0)); // x: descriptor.x + (Math.random() - .5) / 50 * descriptor.x (ça spawn dans un carré autour de nous)
 			}
-		}, 10 * 1000);*/
+		}, 10 * 1000);
 
 		setInterval(() => {
 			for (let [peerId] of this.rps.partialView) {

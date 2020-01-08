@@ -6,6 +6,7 @@ import fetch from 'node-fetch';
 import TMan from './overlay/TMan';
 import Pokemon from './Pokemon';
 import Consensus from './consensus/Consensus';
+import distance from './euclidianDistance';
 
 /**
  * Mêt à jour le contenu de tous les éléments html ayant une certaine classe
@@ -70,6 +71,8 @@ let updateCurrentPosition = position => {
 
 	update('pos-x', position.x);
 	update('pos-y', position.y);
+
+	refresh();
 };
 
 /**
@@ -104,6 +107,7 @@ function refresh() {
 	neighboursTable.appendChild(trTman);
 
 	for (let [id, neighboor] of node.overlay('tman').network.rps.partialView) {
+		console.log('position', neighboor.descriptor);
 		if (markers.has(id)) {
 			markers.get(id).setPosition({
 				lat: neighboor.descriptor.x,
@@ -141,20 +145,23 @@ function refresh() {
 		}
 	}
 
-	for(let [id, marker] of markers.entries()) {
+	/*for (let [id, marker] of markers.entries()) {
+		for (let [id, consensus] of node.overlay('tman').network.visiblePokemons.entries()) {
 
-	}
+		}
+	}*/
 
 	for (let [id, consensus] of node.overlay('tman').network.visiblePokemons.entries()) {
-		console.log('consensus', consensus);
+		console.log('consensus.pokemon', consensus.pokemon);
 		const pokemon = consensus.pokemon;
 		if (markers.has(id)) {
-
+			// console.log('not add pokemon');
 		} else {
+			// console.log('add pokemon', pokemon);
 			markers.set(id, new google.maps.Marker({
 				position: {
-					lat: pokemon.x,
-					lng: pokemon.y
+					lat: pokemon.position.x,
+					lng: pokemon.position.y
 				},
 				icon: {
 					url: icons.pokemon.evoli.icon,
