@@ -67,7 +67,7 @@ Dans le but de trouver les utilisateurs proches de soi, nous avons utilisé la l
 
 ## Paxos
 
-Pour ne capturer un Pokémon qu'une seule fois, l'utilisation d'un consensus est obligatoire. Pour ceci, nous passons par Paxos, et plus particulièrement Single-Decree Paxos.
+Pour ne capturer un Pokémon qu'une seule fois, l'utilisation d'un consensus est obligatoire. Pour ceci, nous passons par Paxos, et plus particulièrement Single-Decree Paxos. 
 
 # Démarrer le projet
 
