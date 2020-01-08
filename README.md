@@ -2,14 +2,14 @@
 
 ## Pokémon Go
 
-Jeu mobile massivement multijoueur  
-Plusieurs fonctionnalités intéressantes:
+Pokémon Go est un jeu mobile massivement multijoueur  
+Plusieurs fonctionnalités sont intéressantes:
 - Déplacement sur une carte du monde à l'aide du GPS
-- Permet de capturer des pokémons
+- Capturer des pokémons qui sont dans notre zone géographique
 
 Fonctionnalités qui ne nous intéressent pas:
 - Plusieurs personnes peuvent capturer le même pokémon
-- Application centralisée
+- L'application est centralisée
 
 Ainsi nous voulons recréer le jeu dans un système distribué en rajoutant une contrainte qui permet à un pokémon de n'être capturé que par une seule personne au maximum
 
@@ -22,23 +22,23 @@ Pour chaque problème plusieurs solutions s'offrent à nous et nous allons déta
 
 ## Les contraintes technologiques
 
-Pour rajouter du challenge à ce projet, la contrainte technologique suivante a été imposée: l'application doit pouvoir tourner dans un navigateur web. Ceci nous impose de coder en HTML/JavaScript.
+La contrainte principale de ce projet est que le jeu doit pouvoir tourner dans un navigateur web, nous devions donc obligatoirement coder en HTML/JavaScript.
 
 # Solutions proposées
 
 ## Réseau distribué
 
-Dans un réseau distribué, les client communiquent entre eux directement, mais il faut au préalable les connecter entre eux. Pour ce faire nous avons pensé à 2 possibilités:
+Dans un réseau distribué, les client communiquent entre eux directement, mais il faut au préalable les connecter entre eux. Pour ce faire nous avions deux possibilités:
 - Des connexions opportunistes (en bluetooth par exemple)
 - Des connexions par internet à l'aide d'un serveur qui initie la connexion entre les utilisateurs
 
-La première approche est très limitée puisque la portée du bluetooth est d'une dizaine de mètres, et limité à 7 connexions en parallèle.  
-En revanche La deuxième approche est plus simple à mettre en place, un serveur initie la connexion entre les utilisateurs puis nous nous débrouillons pour créer un réseau robuste entre les utilisateurs.
+La première approche est très limitée puisque la portée du bluetooth est d'une dizaine de mètres, et limitée à 7 connexions en parallèle.  
+En revanche La deuxième approche est plus simple à mettre en place, un serveur initie la connexion entre les utilisateurs puis nous créons un réseau robuste entre les utilisateurs.
 
-C'est pourquoi nous avons choisis d'utiliser l'algorithme Cyclon pour créer un réseau dynamique et robuste aux déconnexions.
+Nous avons choisi la deuxième approche : les utilisateurs se connectent à un signaling server, nous utilison par la suite l'algorithme Cyclon pour créer un réseau dynamique et robuste aux déconnexions.
 
 Fonctionnement de Cyclon:  
-Cyclon génere un graphe améatoire en effectuant des "shuffles" entres les noeuds du graphes.
+Cyclon génère un graphe aléatoire en effectuant des "shuffles" entres les noeuds du graphes.
 Dans Cyclon, et comme dans l'algorithme basique de shuffle, tous les noeuds vont périodiquement:
 - Séléctionner un nombre aléatoire de voisin parmis leur liste de voisin,
 - Séléctionner un voisin dans la sous-liste choisie précédemment avec lequel le noeud va effectuer un échange des autres voisin de la sous-liste, dans la sous-liste l'addresse du voisin choisit pour l'échange est renplacée par celle du voisin commençant l'échange,
