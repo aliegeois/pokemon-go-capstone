@@ -55,7 +55,7 @@ Pour chaque capture de pokémon, il faut réaliser un consensus entre les utilis
 
 Celui-ci a besoin d'un ensemble de processus qui réalisent le consensus, c'est pourquoi nous avons besoin, lors de chaque capture, de récupérer tous les utilisateurs qui peuvent voir le pokémon et de les recruter pour le consensus.
 
-# Conséquences de solutions décidées
+# Conséquences des solutions adoptées
 
 Chaque solution que nous avons choisie apporte son lot d'avantages et d'inconvénient, nous en discutons ici.
 
@@ -77,7 +77,15 @@ réduire le nombre d'échanges nécessaires pour avoir le bon set de voisins.
 ## Paxos
 
 Pour ne capturer un Pokémon qu'une seule fois, l'utilisation d'un consensus est obligatoire. Pour ceci, nous passons par Paxos, et plus particulièrement Single-Decree Paxos.
-Nous avons implémenté les différentes composantes du protocole Paxos dans notre application. Chaque utilisateur et Pokémon possède un identifiant unique. A chaque apparition d'un Pokémon, un objet "Consensus" est crée et un leader est élu. Chaque utilisateur qui voit le Pokémon est un accepteur. De ce fait, lorsqu'un utilisateur souhaite capturer un Pokémon, il propose la valeur de son identifiant au leader pour demander la capture du Pokémon. Le leader soumet cette valeur à tous les accepteurs et, si plus de la moitié des accepteurs acceptent la valeur, alors cet utilisateur a capturé le Pokémon. De cette façon, un Pokémon peut être capturé que par un seul utilisateur. En effet, si un utilisateur souhaite capturer un Pokémon qui a déjà été capturé, les accepteurs refuseront la demande.
+Nous avons implémenté les différentes composantes du protocole Paxos dans notre application. Chaque utilisateur et Pokémon possède un identifiant unique. A chaque apparition d'un Pokémon, un objet "Consensus" est créé et un leader est élu. Chaque utilisateur qui voit le Pokémon est un accepteur. De ce fait, lorsqu'un utilisateur souhaite capturer un Pokémon, il propose la valeur de son identifiant au leader pour demander la capture du Pokémon. Le leader soumet cette valeur à tous les accepteurs et, si plus de la moitié des accepteurs acceptent la valeur, alors cet utilisateur a capturé le Pokémon. De cette façon, un Pokémon peut être capturé que par un seul utilisateur. En effet, si un utilisateur souhaite capturer un Pokémon qui a déjà été capturé, les accepteurs refuseront la demande.
+
+# Possibilités d'amélioration
+
+Contre toute attente, ce projet n'est pas parfait et pourrait être amélioré. Nous faisons face à plusieurs problèmes, certains d'entre eux résolvables facilement, et d'autres quasiment impossibles à régler.
+
+Le problème le plus flagrant est la disparition des pokémons quand plus personne n'est présent autour. En effet sans serveur central, les informations sont stockées chez les clients, et si tous les clients qui possèdent une information particulière se déconnectent, cette information disparait. Il n'y a pas de solution à ce problème.
+
+Une fonctionnalité qu'il serait intéressant d'emplémenter est un chat entre les joueurs. Faire ceci entre 2 joueurs proches est facile, il suffit de regarder les voisins dans l'overlay tman, mais si 2 joueurs n'ont pas de connexion directe entre eux, la tâche se complique. Une solution possible serait d'implémenter une dht sur le réseau cyclon, permettant de connaître rapidement l'adresse de chaque joueur. Malheureusement, dans une application faite pour supporter possiblement des millions de joueurs, cela demanderait à chaque utilisateur de stocker énormément de données en local. 
 
 # Démarrer le projet
 
