@@ -68,7 +68,8 @@ Dans le but de trouver les utilisateurs proches de soi, nous avons utilisé la l
 
 ## Paxos
 
-Pour ne capturer un Pokémon qu'une seule fois, l'utilisation d'un consensus est obligatoire. Pour ceci, nous passons par Paxos, et plus particulièrement Single-Decree Paxos. 
+Pour ne capturer un Pokémon qu'une seule fois, l'utilisation d'un consensus est obligatoire. Pour ceci, nous passons par Paxos, et plus particulièrement Single-Decree Paxos.
+Nous avons implémenté les différentes composantes du protocole Paxos dans notre application. Chaque utilisateur et Pokémon possède un identifiant unique. A chaque apparition d'un Pokémon, un objet "Consensus" est crée et un leader est élu. Chaque utilisateur qui voit le Pokémon est un accepteur. De ce fait, lorsqu'un utilisateur souhaite capturer un Pokémon, il propose la valeur de son identifiant au leader pour demander la capture du Pokémon. Le leader soumet cette valeur à tous les accepteurs et, si plus de la moitié des accepteurs acceptent la valeur, alors cet utilisateur a capturé le Pokémon. De cette façon, un Pokémon peut être capturé que par un seul utilisateur. En effet, si un utilisateur souhaite capturer un Pokémon qui a déjà été capturé, les accepteurs refuseront la demande.
 
 # Démarrer le projet
 
