@@ -89,11 +89,15 @@ export default class TMan extends TManOverlay {
 				if (Math.hypot(Math.abs(x1 - x2), Math.abs(y1 - y2)) < 10)
 					nbPeers++;
 			}
-			let p = 1 / (nbPeers + 1);
+			let p = 1 / (nbPeers + 2);
 			let r = Math.random();
 			if (r < p) {
-				console.log('un evoli est apparu')
-				this.spawnPokemon(new Pokemon('Evoli', 0, 0)); // x: descriptor.x + (Math.random() - .5) / 50 * descriptor.x (ça spawn dans un carré autour de nous)
+				console.log('*************************')
+				let x = this.rps.options.descriptor.x + (Math.random() - .5) / 4790 * this.rps.options.descriptor.x;
+				let y = this.rps.options.descriptor.y + (Math.random() - .5) / 220 * this.rps.options.descriptor.y;
+				console.log(x);
+				console.log(y);
+				this.spawnPokemon(new Pokemon('Evoli', x, y)); // x: descriptor.x + (Math.random() - .5) / 50 * descriptor.x (ça spawn dans un carré autour de nous)
 			}
 		}, 10 * 1000);
 

@@ -169,6 +169,23 @@ function refresh() {
 				},
 				map
 			}));
+            var contentString = '<div id="content">' +
+                '<div id="siteNotice">' +
+                '</div>' +
+                '<h1 id="firstHeading" class="firstHeading">Billy le evoli</h1>' +
+                '<div id="bodyContent">' +
+                '<p><b>Evoli</b> est un pokemon très joli</p>' +
+                '<button>Attraper</button>'
+                '</div>' +
+                '</div>';
+
+            var infowindow = new google.maps.InfoWindow({
+                content: contentString
+            });
+
+            markers.get(id).addListener('click', function () {
+                infowindow.open(map, markers.get(id));
+            });
 		}
 	}
 }
