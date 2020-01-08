@@ -83,8 +83,7 @@ export default class TMan extends TManOverlay {
 			// console.log('received updated descriptor from', peerId, descriptor);
 		});
 
-		/*setInterval(() => {
-			console.log(' *** PEERS ***');
+		setInterval(() => {
 			let nbPeers = 0;
 			for (let [peerId, {descriptor}] of this.rps.partialView) {
 				console.log(peerId);
@@ -97,12 +96,11 @@ export default class TMan extends TManOverlay {
 			}
 			let p = 1 / (nbPeers + 1);
 			let r = Math.random();
-			console.log(r);
-			console.log(p);
-			if (r < p)
+			if (r < p) {
+				console.log('un evoli est apparu')
 				this.spawnPokemon(new Pokemon('Evoli', 0, 0));
-			console.log(' *** peers ***');
-		}, 10 * 1000);*/
+			}
+		}, 10 * 1000);
 
 		setInterval(() => {
 			for (let [peerId] of this.rps.partialView) {

@@ -88,7 +88,7 @@ class TManOverlay extends AbstractNetwork {
 		// if webrtc options specified: create object config for Spray
 		this.options = lmerge({ config: options.webrtc }, options)
 		const tmanOptions = lmerge({
-			descriptor: this._startDescriptor(),
+				descriptor: this._startDescriptor(),
 			descriptorTimeout: this._descriptorTimeout(),
 			ranking: this._rankingFunction()
 		}, this.options)

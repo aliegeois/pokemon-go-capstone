@@ -37,7 +37,17 @@ En revanche La deuxième approche est plus simple à mettre en place, un serveur
 
 C'est pourquoi nous avons choisis d'utiliser l'algorithme Cyclon pour créer un réseau dynamique et robuste aux déconnexions.
 
-> (expliquer cyclon (mais pas trop))
+Fonctionnement de Cyclon:  
+Cyclon génere un graphe améatoire en effectuant des "shuffles" entres les noeuds du graphes.
+Dans Cyclon, et comme dans l'algorithme basique de shuffle, tous les noeuds vont périodiquement:
+- Séléctionner un nombre aléatoire de voisin parmis leur liste de voisin,
+- Séléctionner un voisin dans la sous-liste choisie précédemment avec lequel le noeud va effectuer un échange des autres voisin de la sous-liste, dans la sous-liste l'addresse du voisin choisit pour l'échange est renplacée par celle du voisin commençant l'échange,
+- Le voisin séléctionné choisit aléatoirement une sous-liste de ses voisins qu'il va renvoyer pour l'échange (la taille de la sous-liste est inférieure où égale à celle de la première sous-liste).
+
+Dans Cyclon, les voisins ont un âge qu'il leur est associé, les échanges sont lancés avec le voisin le plus vieux de la liste et après l'échange. Après l'échange, dans la liste de voisins du noeud précedement choisit, l'âge du noeud ayant commencé l'échange précedent est initialisé à 0.
+Avant chaque échange, l'aĝe de tous les voisins est augmenté de 1.
+
+Pour l'insertion dans le graphe, Cyclon utilise un point d'entrée externe qui va effectuer plusieurs déplacement aléatoire dans le graphe pour obtenir plusieurs noeuds aléatoires du graphe que le noeud qui va être inseré va ajouter dans sa liste de voisins.
 
 ## Capture des pokémons
 

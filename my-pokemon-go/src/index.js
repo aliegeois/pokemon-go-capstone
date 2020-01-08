@@ -5,6 +5,247 @@ import TMan from './overlay/TMan';
 import Pokemon from './Pokemon';
 import Consensus from './consensus/Consensus';
 
+// ******************************************** MAP ********************************************
+
+/** @type {google.maps.Marker} */
+let marker;
+let markers = {};
+let map;
+let pokemons = {};
+
+window.markers = markers;
+
+const icons = {
+    trainer: {
+        icon: 'https://cdn.discordapp.com/attachments/627178681428606989/638045396282769431/trainer_v3.png'
+    },
+
+    self: {
+        icon: 'https://cdn.discordapp.com/attachments/627178681428606989/638326088573124618/trainer_v4.png'
+    },
+
+    pokemon: {
+        icon: 'https://cdn.discordapp.com/attachments/627178681428606989/637666290563284995/pokeball_v1.png'
+    }
+};
+
+/**
+ *
+ * @param {{x: Number, y: Number}?} pos
+ * @returns {Promise<{x: Number, y: Number}>}
+ */
+let getCurrentPosition = (pos = { x: null, y: null }) => {
+    return new Promise((resolve, reject) => {
+        if (pos.x !== null && pos.y !== null) {
+            resolve({
+                x: pos.x,
+                y: pos.y
+            });
+        } else {
+            navigator.geolocation.getCurrentPosition(position => {
+                resolve({
+                    x: position.coords.latitude,
+                    y: position.coords.longitude,
+                });
+            }, reject);
+        }
+    });
+}
+
+getCurrentPosition().then(position => {
+    const { x, y } = position;
+    console.log('data:', { x, y });
+
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: {
+            lat: x,
+            lng: y
+        },
+        zoom: 17,
+        disableDefaultUI: true,
+        gestureHandling: 'greedy',
+        styles: [
+            {
+                "elementType": "labels",
+                "stylers": [
+                    {
+                        "visibility": "off"
+                    }
+                ]
+            },
+            {
+                "elementType": "labels.icon",
+                "stylers": [
+                    {
+                        "visibility": "off"
+                    }
+                ]
+            },
+            {
+                "featureType": "landscape.man_made",
+                "elementType": "geometry.fill",
+                "stylers": [
+                    {
+                        "color": "#a2c081"
+                    }
+                ]
+            },
+            {
+                "featureType": "landscape.natural",
+                "elementType": "geometry.fill",
+                "stylers": [
+                    {
+                        "color": "#8cb75d"
+                    }
+                ]
+            },
+            {
+                "featureType": "poi.medical",
+                "elementType": "geometry.fill",
+                "stylers": [
+                    {
+                        "color": "#ff0000"
+                    }
+                ]
+            },
+            {
+                "featureType": "poi.park",
+                "elementType": "geometry.fill",
+                "stylers": [
+                    {
+                        "color": "#97c367"
+                    }
+                ]
+            },
+            {
+                "featureType": "poi.sports_complex",
+                "elementType": "geometry.fill",
+                "stylers": [
+                    {
+                        "color": "#bc2f2f"
+                    },
+                    {
+                        "weight": 1.5
+                    }
+                ]
+            },
+            {
+                "featureType": "poi.sports_complex",
+                "elementType": "geometry.stroke",
+                "stylers": [
+                    {
+                        "color": "#898779"
+                    }
+                ]
+            },
+            {
+                "featureType": "road.arterial",
+                "elementType": "geometry",
+                "stylers": [
+                    {
+                        "color": "#d9d5ba"
+                    }
+                ]
+            },
+            {
+                "featureType": "road.arterial",
+                "elementType": "geometry.fill",
+                "stylers": [
+                    {
+                        "color": "#bcbaa7"
+                    }
+                ]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry.fill",
+                "stylers": [
+                    {
+                        "color": "#ffdf00"
+                    }
+                ]
+            },
+            {
+                "featureType": "road.highway",
+                "elementType": "geometry.stroke",
+                "stylers": [
+                    {
+                        "color": "#898779"
+                    }
+                ]
+            },
+            {
+                "featureType": "road.local",
+                "elementType": "geometry.fill",
+                "stylers": [
+                    {
+                        "color": "#eae182"
+                    }
+                ]
+            },
+            {
+                "featureType": "transit.line",
+                "elementType": "geometry.stroke",
+                "stylers": [
+                    {
+                        "color": "#898779"
+                    }
+                ]
+            },
+            {
+                "featureType": "transit.station",
+                "elementType": "geometry.stroke",
+                "stylers": [
+                    {
+                        "color": "#898779"
+                    }
+                ]
+            },
+            {
+                "featureType": "water",
+                "elementType": "geometry.fill",
+                "stylers": [
+                    {
+                        "color": "#679bc3"
+                    }
+                ]
+            }
+        ]
+    });
+
+    // const features = [{
+    // 	position: {
+    // 		lat: x,
+    // 		lng: y
+    // 	},
+    // 	type: 'pokeball'
+    // }];
+
+    marker = new google.maps.Marker({
+        position: {
+            lat: x,
+            lng: y
+        },
+        icon: {
+            url: icons.self.icon,
+            anchor: new google.maps.Point(16, 16)
+        },
+        map
+    });
+
+    // for(let i = 0; i < features.length; i++) {
+    // 	new google.maps.Marker({
+    // 		position: features[i].position,
+    // 		icon: icons[features[i].type].icon,
+    // 		map
+    // 	});
+    // };
+
+    start(position);
+});
+
+// ******************************************** MAP ********************************************
+
 /**
  * Mêt à jour le contenu de tous les éléments html ayant une certaine classe
  * @param {string} type Classe de l'élément
@@ -38,7 +279,7 @@ function showNeighbours() {
 	/** @type {string[]} */
 	const neighboursCyclon = node.overlay().network.getNeighbours();
 	/** @type {string[]} */
-	const neighboursTman = node.overlay('tman').network.getNeighbours();
+	const overlayTman = node.overlay('tman');
 
 	const trCyclon = document.createElement('tr');
 	for(let neighbour of neighboursCyclon) {
@@ -48,10 +289,23 @@ function showNeighbours() {
 	}
 	
 	const trTman = document.createElement('tr');
-	for(let neighbour of neighboursTman) {
+	for(let [id, neighbour] of overlayTman.network.rps.partialView) {
 		const td = document.createElement('td');
-		td.innerHTML = neighbour;
+		console.log('neighbour : ' + neighbour);
+        td.innerHTML = id + ` - (x: ${neighbour.descriptor.x}, y: ${neighbour.descriptor.y})`;
 		trTman.appendChild(td);
+
+        markers[id] = new google.maps.Marker({
+            position: {
+                lat: neighbour.descriptor.x,
+                lng: neighbour.descriptor.y
+            },
+            icon: {
+                url: icons.trainer.icon,
+                anchor: new google.maps.Point(16, 16)
+            },
+            map
+        });
 	}
 
 	while(neighboursTable.lastElementChild)
@@ -89,8 +343,6 @@ function showPokemons() {
 
 /** @type {Foglet} */
 let node;
-/** @type {Map.<string, Consensus>} */
-const pokemons = new Map();
 
 addEventListener('DOMContentLoaded', () => {
 	console.log('fetching ice servers');
@@ -197,17 +449,17 @@ addEventListener('DOMContentLoaded', () => {
 					console.log('tman close', peerId);
 				});
 
-				/*node.overlay('tman').network.on('pokemon-spawned', pokemon => {
+				node.overlay('tman').network.rps.unicast.on('pokemon-spawned', pokemon => {
 					console.log('Pokémon spawned', pokemon);
-					pokemons.set(pokemon.id, new Consensus(node, 'tman', pokemon, console.log));
+					pokemons[pokemon.id] = new Consensus(node, 'tman', pokemon, console.log);
 					showPokemons();
 				});
 
-				node.overlay('tman').network.on('pokemon-catched', pokemon => {
+				node.overlay('tman').network.rps.unicast.on('pokemon-catched', pokemon => {
 					console.log('Pokémon catched', pokemon);
-					pokemons.delete(pokemon.id);
+					pokemons[pokemon.id] = null;
 					showPokemons();
-				});*/
+				});
 				// console.log(node.overlay('tman').network);
 				// node.overlay('tman').network.rps._start();
 				// node.overlay('tman').network.rps.join().then(peerId => {
@@ -215,18 +467,30 @@ addEventListener('DOMContentLoaded', () => {
 				// });
 
 			}).catch(console.error);
+			setInterval(refresh,5*1000);
 		});
 
 
 
 	document.getElementById('update-position').addEventListener('click', () => {
-		const x = parseInt(document.getElementById('input-pos-x').value),
-			y = parseInt(document.getElementById('input-pos-y').value);
+		const x = parseFloat(document.getElementById('input-pos-x').value),
+			y = parseFloat(document.getElementById('input-pos-y').value);
 
 		if (isNaN(x) || isNaN(y))
 			return;
 
 		node.overlay('tman').network.descriptor = { x, y };
+
+        marker.setPosition({
+            lat: x,
+            lng: y
+        });
+        map.setOptions({
+            center: {
+                lat: x,
+                lng: y
+            }
+        });
 
 		update('pos-x', x);
 		update('pos-y', y);
@@ -243,3 +507,27 @@ addEventListener('DOMContentLoaded', () => {
 		spawnPokemon(name, x, y);
 	});
 });
+
+let refresh = () => {
+    getCurrentPosition().then(position => {
+        const { x, y } = position;
+        console.log('data:', { x, y });
+
+        node.overlay('tman').network.descriptor = { x, y };
+
+        map.setOptions({
+            center: {
+                lat: x,
+                lng: y
+            }
+        });
+
+        marker.setPosition({
+            lat: x,
+            lng: y
+        });
+
+        update('pos-x', x);
+        update('pos-y', y);
+    });
+}
