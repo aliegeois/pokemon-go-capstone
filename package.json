@@ -32,6 +32,7 @@
 		"node-fetch": "^2.6.0",
 		"tman-wrtc": "^1.0.0",
 		"uuid": "^3.3.3",
+		"webpack": "*",
 		"webpack-dev-server": "*"
 	},
 	"scripts": {
