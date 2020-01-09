@@ -48,8 +48,8 @@
 		"webpack-dev-server": "^3.1.10"
 	},
 	"scripts": {
-		"start": "webpack-dev-server --mode development --open --hot",
-		"build": "webpack --mode production",
-		"prod": "webpack"
+		"dev": "webpack-dev-server --mode development --open --hot",
+		"build": "webpack",
+		"start": "webpack-dev-server --mode production"
 	}
 }
