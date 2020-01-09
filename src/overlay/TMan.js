@@ -7,7 +7,7 @@ import Consensus from '../consensus/VraiConsensusJeJure';
 
 class LoggableMap extends Map {
 	set(key, value) {
-		console.log(`set(${key}, ${value})`);
+		//console.log(`set(${key}, ${value})`);
 		super.set(key, value);
 	}
 }
@@ -19,7 +19,7 @@ export default class TMan extends TManOverlay {
 	constructor(networkManager, options) {
 		super(networkManager, options);
 
-		console.log('tman', this);
+		//console.log('tman', this);
 
 		/** @type {Map.<string, Pokemon>} */
 		this.visiblePokemons = new LoggableMap();
@@ -35,9 +35,9 @@ export default class TMan extends TManOverlay {
 			}
 		});*/
 		this.rps.unicast.on('pokemon-spawned', message => {
-			console.log(message.peerId + ' said that a pokemon has spawned (' + message + ')');
+			//console.log(message.peerId + ' said that a pokemon has spawned (' + message + ')');
 			this.visiblePokemons.set(message.pokemon.id, new Consensus(this._manager.overlay(options.pid), message.pokemon, leader => {
-				console.log('elected leader:', leader);
+				//console.log('elected leader:', leader);
 			}));
 		});
 		/*this.rps.unicast.on('pokemon-spawned', ({ peerId, pokemon }) => {
@@ -47,10 +47,16 @@ export default class TMan extends TManOverlay {
 				console.log('elected leader:', leader);
 			}));
 		});*/
-		this.rps.unicast.on('pokemon-catched', message => {
+		this.rps.unicast.on('pokemon-caught', message => {
 			// this.emit('pokemon-catched', pokemon);
-			console.log('Pokemon', message.pokemon.id, 'catched by', message.peerId);
+			console.log('Pokemon', message.pokemon.id, 'caught by', message.peerId);
+			for (let pok of this.visiblePokemons) {
+				console.log(pok.id);
+			}
 			this.visiblePokemons.delete(message.pokemon.id);
+			options.markers.get(message.pokemon.id).setMap(null);
+			console.log('markers : ',options.markers);
+			options.markers.delete(message.pokemon.id);
 		});
 
 
@@ -77,29 +83,27 @@ export default class TMan extends TManOverlay {
 			this.rps.cache.set(message.peerId, message.descriptor);
 			// console.log('received updated descriptor from', peerId, descriptor);
 		});
+		setTimeout(() => {
+			setInterval(() => {
+				let nbPeers = 0;
+				for (let [peerId, { descriptor }] of this.rps.partialView) {
+					const x1 = descriptor.x;
+					const y1 = descriptor.y;
+					const x2 = this.rps.options.descriptor.x;
+					const y2 = this.rps.options.descriptor.y;
+					if (Math.hypot(Math.abs(x1 - x2), Math.abs(y1 - y2)) < 10)
+						nbPeers++;
+				}
+				let p = 1 / (nbPeers + 1);
+				let r = Math.random();
+				if (r < p) {
+					let x = this.rps.options.descriptor.x + (Math.random() - .5) / 4790 * this.rps.options.descriptor.x;
+					let y = this.rps.options.descriptor.y + (Math.random() - .5) / 220 * this.rps.options.descriptor.y;
+					this.spawnPokemon(new Pokemon('Evoli', x, y)); // x: descriptor.x + (Math.random() - .5) / 50 * descriptor.x (ça spawn dans un carré autour de nous)
+				}
+			}, 10 * 1000);
+		}, 10*1000);
 
-		setInterval(() => {
-			let nbPeers = 0;
-			for (let [peerId, { descriptor }] of this.rps.partialView) {
-				console.log(peerId);
-				const x1 = descriptor.x;
-				const y1 = descriptor.y;
-				const x2 = this.rps.options.descriptor.x;
-				const y2 = this.rps.options.descriptor.y;
-				if (Math.hypot(Math.abs(x1 - x2), Math.abs(y1 - y2)) < 10)
-					nbPeers++;
-			}
-			let p = 1 / (nbPeers + 2);
-			let r = Math.random();
-			if (r < p) {
-				console.log('*************************')
-				let x = this.rps.options.descriptor.x + (Math.random() - .5) / 4790 * this.rps.options.descriptor.x;
-				let y = this.rps.options.descriptor.y + (Math.random() - .5) / 220 * this.rps.options.descriptor.y;
-				console.log(x);
-				console.log(y);
-				this.spawnPokemon(new Pokemon('Evoli', x, y)); // x: descriptor.x + (Math.random() - .5) / 50 * descriptor.x (ça spawn dans un carré autour de nous)
-			}
-		}, 10 * 1000);
 
 		setInterval(() => {
 			for (let [peerId] of this.rps.partialView) {
@@ -107,7 +111,6 @@ export default class TMan extends TManOverlay {
 					peerId: this.inviewId,
 					descriptor: this.rps.options.descriptor
 				});
-				// console.log(`send updated descriptor to ${peerId}`);
 			}
 		}, 10 * 1000);
 	}
@@ -117,11 +120,11 @@ export default class TMan extends TManOverlay {
 	 */
 	spawnPokemon(pokemon) {
 		this.visiblePokemons.set(pokemon.id, new Consensus(this._manager.overlay(this.options.pid), pokemon, leader => {
-			console.log('elected leader is', leader);
+			//console.log('elected leader is', leader);
 		}));
 		for (let [peerId, { descriptor }] of this.rps.partialView) {
 			if (distance(this.rps.options.descriptor, descriptor) <= this.options.range) {
-				console.log('emit', 'pokemon-spawned', peerId, this.inviewId, pokemon);
+				//console.log('emit', 'pokemon-spawned', peerId, this.inviewId, pokemon);
 				this.rps.unicast.emit('pokemon-spawned', peerId, {
 					peerId: this.inviewId,
 					pokemon

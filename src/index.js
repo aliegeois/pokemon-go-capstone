@@ -5,8 +5,8 @@ import fetch from 'node-fetch';
 
 import TMan from './overlay/TMan';
 import Pokemon from './Pokemon';
-import Consensus from './consensus/Consensus';
-import distance from './euclidianDistance';
+// import Consensus from './consensus/Consensus';
+// import distance from './euclidianDistance';
 
 /**
  * Mêt à jour le contenu de tous les éléments html ayant une certaine classe
@@ -79,11 +79,9 @@ let updateCurrentPosition = position => {
  * Affiche la liste des voisins dans un élément <table>
  */
 function refresh() {
-	const neighboursTable = document.getElementById('neighbours');
+	/*const neighboursTable = document.getElementById('neighbours');
 
-	/** @type {string[]} */
 	const neighboursCyclon = node.overlay().network.getNeighbours();
-	/** @type {string[]} */
 	const neighboursTman = node.overlay('tman').network.getNeighbours();
 
 	const trCyclon = document.createElement('tr');
@@ -104,10 +102,10 @@ function refresh() {
 		neighboursTable.removeChild(neighboursTable.lastElementChild);
 
 	neighboursTable.appendChild(trCyclon);
-	neighboursTable.appendChild(trTman);
+	neighboursTable.appendChild(trTman);*/
 
 	for (let [id, neighboor] of node.overlay('tman').network.rps.partialView) {
-		console.log('position', neighboor.descriptor);
+		//console.log('position', neighboor.descriptor);
 		if (markers.has(id)) {
 			markers.get(id).setPosition({
 				lat: neighboor.descriptor.x,
@@ -152,7 +150,7 @@ function refresh() {
 	}*/
 
 	for (let [id, consensus] of node.overlay('tman').network.visiblePokemons.entries()) {
-		console.log('consensus.pokemon', consensus.pokemon);
+		//console.log('consensus.pokemon', consensus.pokemon);
 		const pokemon = consensus.pokemon;
 		if (markers.has(id)) {
 			// console.log('not add pokemon');
@@ -169,7 +167,7 @@ function refresh() {
 				},
 				map
 			}));
-            var contentString = '<div id="content">' +
+            /*var contentString = '<div id="content">' +
                 '<div id="siteNotice">' +
                 '</div>' +
                 '<h1 id="firstHeading" class="firstHeading">Billy le evoli</h1>' +
@@ -185,7 +183,36 @@ function refresh() {
 
             markers.get(id).addListener('click', function () {
                 infowindow.open(map, markers.get(id));
+            });*/
+            const contentPokemon = document.createElement('div');
+
+            var pokebutton = contentPokemon.appendChild(document.createElement('button'));
+            pokebutton.id = 'catch-pokemon';
+            pokebutton.innerHTML = 'Attraper';
+            pokebutton.addEventListener('click', () => {
+                for (let [peerId] of node.overlay('tman').network.rps.partialView) {
+                    node.overlay('tman').network.rps.unicast.emit('pokemon-caught', peerId, {
+                        peerId: node.inviewId,
+                        pokemon
+                    });
+                }
+                node.overlay('tman').network.visiblePokemons.delete(pokemon.id);
+                markers.get(pokemon.id).setMap(null);
+                console.log('markers : ',markers);
+                markers.delete(pokemon.id);
             });
+
+            let config = {
+                content: contentPokemon
+            };
+
+            var infoPokemon = new google.maps.InfoWindow(config);
+
+            markers.get(id).addListener('click', function () {
+
+                infoPokemon.close();
+                infoPokemon.open(map, markers.get(id));
+            })
 		}
 	}
 }
@@ -287,7 +314,8 @@ let start = position => {
 							room: 'pokeroom'
 						},
 						range: Infinity,
-						pid: 'tman'
+						pid: 'tman',
+                        markers
 					}
 				}]
 			});
@@ -308,25 +336,25 @@ let start = position => {
 					node.overlay('tman').network._options.node = node;
 
 					refresh();
-					console.log('rps open', peerId);
+					//console.log('rps open', peerId);
 				});
 
 				node.overlay().network.rps.on('open', peerId => {
 					refresh();
-					console.log('rps open', peerId);
+					//console.log('rps open', peerId);
 				});
 				node.overlay().network.rps.on('close', peerId => {
 					refresh();
-					console.log('rps close', peerId);
+					//console.log('rps close', peerId);
 				});
 				node.overlay('tman').network.rps.on('open', peerId => {
 					refresh();
-					console.log('tman open', peerId);
+					//console.log('tman open', peerId);
 				});
 				node.overlay('tman').network.rps.on('close', peerId => {
 					refresh();
 					markers.get(peerId).setMap(null);
-					console.log('tman close', peerId);
+					//console.log('tman close', peerId);
 				});
 
 				markers.set(node.inViewID, new google.maps.Marker({
@@ -351,7 +379,7 @@ let start = position => {
 			}).catch(console.error);
 		});
 
-	document.getElementById('update-position').addEventListener('click', () => {
+	/*document.getElementById('update-position').addEventListener('click', () => {
 		const x = parseFloat(document.getElementById('input-pos-x').value),
 			y = parseFloat(document.getElementById('input-pos-y').value);
 
@@ -373,7 +401,7 @@ let start = position => {
 			return;
 
 		spawnPokemon(name, x, y);
-	});
+	});*/
 }
 
 addEventListener('DOMContentLoaded', () => {
