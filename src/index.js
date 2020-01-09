@@ -2,7 +2,6 @@
 
 import { Foglet } from 'foglet-core';
 import fetch from 'node-fetch';
-import express from 'express';
 
 import TMan from './overlay/TMan';
 import Pokemon from './Pokemon';
@@ -542,12 +541,3 @@ addEventListener('DOMContentLoaded', () => {
 		});
 	});
 });
-
-
-const app = express()
- 
-app.get('/', function (req, res) {
-  res.sendFile('./index.html');
-})
- 
-app.listen(80);
